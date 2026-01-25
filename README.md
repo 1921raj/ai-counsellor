@@ -247,19 +247,6 @@ Frontend will be available at `http://localhost:3000`
 ### Dashboard
 - `GET /dashboard` - Get dashboard data
 
-## 🎯 Submission Checklist
-
-- [ ] Backend running with PostgreSQL
-- [ ] Frontend running with all pages
-- [ ] Complete onboarding flow
-- [ ] AI Counsellor chat working
-- [ ] University discovery and shortlisting
-- [ ] University locking enforced
-- [ ] Task management functional
-- [ ] Responsive design
-- [ ] Demo video (3-5 minutes)
-- [ ] Deployment link
-
 ## 🚢 Deployment
 
 ### Backend (Railway/Render)
@@ -275,22 +262,3 @@ Frontend will be available at `http://localhost:3000`
 3. Set environment variables
 4. Deploy
 
-## 📞 Support
-
-For issues or questions:
-- Check API documentation at `/docs`
-- Review implementation plan in `.agent/workflows/project-plan.md`
-- Test endpoints using the Swagger UI
-
-## 🏆 Success Criteria
-
-1. ✅ Complete stage-based flow working
-2. ✅ AI Counsellor takes actions (not just chat)
-3. ✅ University locking enforced
-4. ✅ Profile-driven recommendations
-5. ✅ Clean, intuitive UI
-6. ✅ Working deployment link
-
----
-
-**Good luck with your hackathon! 🚀**

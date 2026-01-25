@@ -1,0 +1,16 @@
+venv
+__pycache__
+*.pyc
+.env
+.git
+.gitignore
+*.log
+docker-verification.md
+ai_verification.log
+ai_verification_v2.log
+test_key.py
+test_api.py
+list_models.py
+create_db.py
+seed.py
+create_demo.py

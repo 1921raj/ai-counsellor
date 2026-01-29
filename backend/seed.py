@@ -57,6 +57,22 @@ def seed_universities():
             "description": "Consistently ranked among the top universities for science and technology.",
             "website": "https://www.imperial.ac.uk"
         },
+        {
+            "name": "University of Edinburgh",
+            "country": "United Kingdom",
+            "city": "Edinburgh",
+            "ranking": 22,
+            "programs": "Social Sciences, Arts, Law, Medicine, Informatics",
+            "tuition_fee_min": 24000,
+            "tuition_fee_max": 35000,
+            "living_cost_yearly": 13000,
+            "scholarship_available": True,
+            "min_gpa": 3.5,
+            "min_ielts": 6.5,
+            "acceptance_rate": 33,
+            "description": "A historic university offering a wide range of academic opportunities in the Scottish capital.",
+            "website": "https://www.ed.ac.uk"
+        },
         # --- UNITED STATES ---
         {
             "name": "Harvard University",
@@ -91,7 +107,7 @@ def seed_universities():
             "website": "https://www.stanford.edu"
         },
         {
-            "name": "MIT (Massachusetts Institute of Technology)",
+            "name": "MIT",
             "country": "United States",
             "city": "Cambridge, MA",
             "ranking": 5,
@@ -105,6 +121,22 @@ def seed_universities():
             "acceptance_rate": 7,
             "description": "World-renowned for its pioneering research in science and engineering.",
             "website": "https://www.mit.edu"
+        },
+        {
+            "name": "NYU (New York University)",
+            "country": "United States",
+            "city": "New York",
+            "ranking": 38,
+            "programs": "Business, Film, Law, Media, Psychology",
+            "tuition_fee_min": 53000,
+            "tuition_fee_max": 58000,
+            "living_cost_yearly": 25000,
+            "scholarship_available": True,
+            "min_gpa": 3.6,
+            "min_ielts": 7.0,
+            "acceptance_rate": 13,
+            "description": "A global university with campuses in NYC, Abu Dhabi, and Shanghai.",
+            "website": "https://www.nyu.edu"
         },
         # --- CANADA ---
         {
@@ -139,6 +171,22 @@ def seed_universities():
             "description": "Known for its beautiful campus and strong research output.",
             "website": "https://www.ubc.ca"
         },
+        {
+            "name": "McGill University",
+            "country": "Canada",
+            "city": "Montreal",
+            "ranking": 31,
+            "programs": "Medicine, Engineering, Science, Arts",
+            "tuition_fee_min": 25000,
+            "tuition_fee_max": 55000,
+            "living_cost_yearly": 14000,
+            "scholarship_available": True,
+            "min_gpa": 3.6,
+            "min_ielts": 7.0,
+            "acceptance_rate": 46,
+            "description": "A world-class research university in the vibrant city of Montreal.",
+            "website": "https://www.mcgill.ca"
+        },
         # --- AUSTRALIA ---
         {
             "name": "University of Melbourne",
@@ -157,20 +205,20 @@ def seed_universities():
             "website": "https://www.unimelb.edu.au"
         },
         {
-            "name": "Australian National University",
+            "name": "University of Sydney",
             "country": "Australia",
-            "city": "Canberra",
-            "ranking": 30,
-            "programs": "Political Science, Law, Physics, International Relations",
-            "tuition_fee_min": 32000,
-            "tuition_fee_max": 45000,
-            "living_cost_yearly": 22000,
+            "city": "Sydney",
+            "ranking": 19,
+            "programs": "Law, Medicine, Arts, Science, Business",
+            "tuition_fee_min": 38000,
+            "tuition_fee_max": 50000,
+            "living_cost_yearly": 28000,
             "scholarship_available": True,
-            "min_gpa": 3.5,
-            "min_ielts": 7.0,
-            "acceptance_rate": 35,
-            "description": "A research-intensive university in Australia's capital.",
-            "website": "https://www.anu.edu.au"
+            "min_gpa": 3.4,
+            "min_ielts": 6.5,
+            "acceptance_rate": 30,
+            "description": "Australia's first university, known for its academic reputation and stunning campus.",
+            "website": "https://www.sydney.edu.au"
         },
         # --- GERMANY ---
         {
@@ -189,21 +237,39 @@ def seed_universities():
             "description": "One of Europe's top technical universities with very low tuition.",
             "website": "https://www.tum.de"
         },
+        # --- SWITZERLAND ---
         {
-            "name": "Ludwig Maximilian University of Munich (LMU)",
-            "country": "Germany",
-            "city": "Munich",
-            "ranking": 54,
-            "programs": "Medicine, Law, Humanities, Natural Sciences",
-            "tuition_fee_min": 0,
-            "tuition_fee_max": 1000,
-            "living_cost_yearly": 12000,
-            "scholarship_available": False,
-            "min_gpa": 3.5,
+            "name": "ETH Zurich",
+            "country": "Switzerland",
+            "city": "Zurich",
+            "ranking": 7,
+            "programs": "Physics, Engineering, Computer Science, Mathematics",
+            "tuition_fee_min": 1500,
+            "tuition_fee_max": 2000,
+            "living_cost_yearly": 25000,
+            "scholarship_available": True,
+            "min_gpa": 3.8,
             "min_ielts": 7.0,
-            "acceptance_rate": 10,
-            "description": "A premier research university with a tradition since 1472.",
-            "website": "https://www.lmu.de"
+            "acceptance_rate": 27,
+            "description": "A leading technical university in continental Europe.",
+            "website": "https://ethz.ch"
+        },
+        # --- JAPAN ---
+        {
+            "name": "University of Tokyo",
+            "country": "Japan",
+            "city": "Tokyo",
+            "ranking": 28,
+            "programs": "Science, Engineering, Law, Humanities",
+            "tuition_fee_min": 5000,
+            "tuition_fee_max": 8000,
+            "living_cost_yearly": 15000,
+            "scholarship_available": True,
+            "min_gpa": 3.7,
+            "min_ielts": 6.5,
+            "acceptance_rate": 34,
+            "description": "The top-ranked university in Japan for research and academia.",
+            "website": "https://www.u-tokyo.ac.jp"
         },
         # --- SINGAPORE ---
         {
@@ -222,104 +288,39 @@ def seed_universities():
             "description": "Consistently ranked as Asia's top university.",
             "website": "https://www.nus.edu.sg"
         },
+        # --- NETHERLANDS ---
         {
-            "name": "Nanyang Technological University (NTU)",
-            "country": "Singapore",
-            "city": "Singapore",
-            "ranking": 15,
-            "programs": "Engineering, AI, Material Science, Science",
-            "tuition_fee_min": 28000,
-            "tuition_fee_max": 45000,
-            "living_cost_yearly": 10000,
+            "name": "University of Amsterdam",
+            "country": "Netherlands",
+            "city": "Amsterdam",
+            "ranking": 61,
+            "programs": "Communication, Psychology, Social Sciences, Arts",
+            "tuition_fee_min": 10000,
+            "tuition_fee_max": 20000,
+            "living_cost_yearly": 12000,
             "scholarship_available": True,
-            "min_gpa": 3.7,
-            "min_ielts": 6.5,
-            "acceptance_rate": 10,
-            "description": "A young and research-intensive university leading in tech.",
-            "website": "https://www.ntu.edu.sg"
-        },
-        # --- ARTS, DESIGN & FASHION ---
-        {
-            "name": "Royal College of Art",
-            "country": "United Kingdom",
-            "city": "London",
-            "ranking": 1,
-            "programs": "Design, Fine Art, Architecture, Communication",
-            "tuition_fee_min": 25000,
-            "tuition_fee_max": 35000,
-            "living_cost_yearly": 18000,
-            "scholarship_available": True,
-            "min_gpa": 3.2,
-            "min_ielts": 6.5,
-            "acceptance_rate": 15,
-            "description": "The world's most influential post-graduate art and design university.",
-            "website": "https://www.rca.ac.uk"
-        },
-        {
-            "name": "Parsons School of Design",
-            "country": "United States",
-            "city": "New York City",
-            "ranking": 2,
-            "programs": "Fashion Design, Fine Arts, Graphic Design",
-            "tuition_fee_min": 52000,
-            "tuition_fee_max": 56000,
-            "living_cost_yearly": 25000,
-            "scholarship_available": True,
-            "min_gpa": 3.0,
+            "min_gpa": 3.4,
             "min_ielts": 7.0,
-            "acceptance_rate": 35,
-            "description": "A global leader in design education located in the heart of NYC.",
-            "website": "https://www.newschool.edu/parsons"
-        },
-        # --- LAW & SOCIAL SCIENCES ---
-        {
-            "name": "Yale Law School",
-            "country": "United States",
-            "city": "New Haven, CT",
-            "ranking": 1,
-            "programs": "Law, Constitutional Law, International Law",
-            "tuition_fee_min": 68000,
-            "tuition_fee_max": 72000,
-            "living_cost_yearly": 20000,
-            "scholarship_available": True,
-            "min_gpa": 3.9,
-            "min_ielts": 7.5,
             "acceptance_rate": 4,
-            "description": "Consistently ranked as the top law school in the United States.",
-            "website": "https://law.yale.edu"
+            "description": "A research-led university in the heart of Amsterdam with deep cultural roots.",
+            "website": "https://www.uva.nl"
         },
+        # --- FRANCE ---
         {
-            "name": "London School of Economics (LSE)",
-            "country": "United Kingdom",
-            "city": "London",
-            "ranking": 45,
-            "programs": "Economics, Political Science, International Relations, Law",
-            "tuition_fee_min": 24000,
-            "tuition_fee_max": 32000,
-            "living_cost_yearly": 18000,
+            "name": "Sorbonne University",
+            "country": "France",
+            "city": "Paris",
+            "ranking": 59,
+            "programs": "Arts, Humanities, Science, Engineering, Medicine",
+            "tuition_fee_min": 3000,
+            "tuition_fee_max": 5000,
+            "living_cost_yearly": 15000,
             "scholarship_available": True,
-            "min_gpa": 3.7,
-            "min_ielts": 7.0,
-            "acceptance_rate": 9,
-            "description": "A world-class center for social science research and teaching.",
-            "website": "https://www.lse.ac.uk"
-        },
-        # --- MEDICINE & HEALTH ---
-        {
-            "name": "Johns Hopkins University",
-            "country": "United States",
-            "city": "Baltimore, MD",
-            "ranking": 28,
-            "programs": "Medicine, Public Health, Nursing, Biomedical Engineering",
-            "tuition_fee_min": 58000,
-            "tuition_fee_max": 62000,
-            "living_cost_yearly": 18000,
-            "scholarship_available": True,
-            "min_gpa": 3.9,
-            "min_ielts": 7.0,
-            "acceptance_rate": 8,
-            "description": "Renowned for its world-leading medical school and research.",
-            "website": "https://www.jhu.edu"
+            "min_gpa": 3.5,
+            "min_ielts": 6.5,
+            "acceptance_rate": 20,
+            "description": "A world-class university in the center of Paris, famous for its humanities.",
+            "website": "https://www.sorbonne-universite.fr"
         }
     ]
 

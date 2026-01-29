@@ -6,7 +6,9 @@ import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import { chatAPI } from '@/lib/api';
 import toast, { Toaster } from 'react-hot-toast';
-import { ArrowLeft, Send, Bot, User, Sparkles } from 'lucide-react';
+import { ArrowLeft, Send, Bot, User, Sparkles, Mic, MicOff, Volume2, VolumeX } from 'lucide-react';
+import 'regenerator-runtime/runtime';
+import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 
 export default function ChatPage() {
     const router = useRouter();
@@ -15,6 +17,25 @@ export default function ChatPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [isFetchingHistory, setIsFetchingHistory] = useState(true);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+
+    // Voice State
+    const [isTTSActive, setIsTTSActive] = useState(true);
+    const { transcript, listening, resetTranscript, browserSupportsSpeechRecognition } = useSpeechRecognition();
+    const synthRef = useRef<SpeechSynthesis | null>(null);
+
+    // Initialize Speech Synthesis
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            synthRef.current = window.speechSynthesis;
+        }
+    }, []);
+
+    // Speech-to-Text Effect
+    useEffect(() => {
+        if (transcript) {
+            setInput(transcript);
+        }
+    }, [transcript]);
 
     useEffect(() => {
         fetchHistory();
@@ -43,6 +64,34 @@ export default function ChatPage() {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
 
+    // Text-to-Speech Function
+    const speakMessage = (text: string) => {
+        if (!isTTSActive || !synthRef.current) return;
+
+        // Cancel ongoing speech
+        synthRef.current.cancel();
+
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 1.0;
+        utterance.pitch = 1.0;
+
+        // Select a good voice if available
+        const voices = synthRef.current.getVoices();
+        const preferredVoice = voices.find(v => v.name.includes('Google US English') || v.name.includes('Samantha'));
+        if (preferredVoice) utterance.voice = preferredVoice;
+
+        synthRef.current.speak(utterance);
+    };
+
+    const toggleListening = () => {
+        if (listening) {
+            SpeechRecognition.stopListening();
+        } else {
+            resetTranscript();
+            SpeechRecognition.startListening({ continuous: true });
+        }
+    };
+
     const handleSend = async () => {
         if (!input.trim()) return;
 
@@ -68,6 +117,11 @@ export default function ChatPage() {
                 created_at: new Date().toISOString()
             };
             setMessages(prev => [...prev, aiMessage]);
+
+            // Perform TTS on AI response
+            if (isTTSActive) {
+                speakMessage(response.data.message);
+            }
 
             // Show success for actions
             if (response.data.actions && response.data.actions.length > 0) {
@@ -121,6 +175,17 @@ export default function ChatPage() {
                                 </div>
                             </div>
                         </div>
+
+                        {/* Voice Controls */}
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setIsTTSActive(!isTTSActive)}
+                            className={isTTSActive ? "text-indigo-400" : "text-gray-500"}
+                            title={isTTSActive ? "Mute AI Voice" : "Enable AI Voice"}
+                        >
+                            {isTTSActive ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
+                        </Button>
                     </div>
                 </div>
             </div>
@@ -165,8 +230,8 @@ export default function ChatPage() {
                                     {/* Avatar */}
                                     <div
                                         className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${message.role === 'user'
-                                                ? 'bg-gray-700'
-                                                : 'bg-gradient-to-r from-indigo-500 to-purple-500'
+                                            ? 'bg-gray-700'
+                                            : 'bg-gradient-to-r from-indigo-500 to-purple-500'
                                             }`}
                                     >
                                         {message.role === 'user' ? (
@@ -183,8 +248,8 @@ export default function ChatPage() {
                                     >
                                         <div
                                             className={`inline-block max-w-[80%] p-4 rounded-2xl ${message.role === 'user'
-                                                    ? 'bg-indigo-500 text-white'
-                                                    : 'bg-[#1e1e3f] border border-[#2d2d4a]'
+                                                ? 'bg-indigo-500 text-white'
+                                                : 'bg-[#1e1e3f] border border-[#2d2d4a]'
                                                 }`}
                                         >
                                             <p className="text-sm whitespace-pre-wrap">{message.content}</p>
@@ -237,6 +302,16 @@ export default function ChatPage() {
                         >
                             <Send className="w-5 h-5" />
                         </Button>
+
+                        {browserSupportsSpeechRecognition && (
+                            <Button
+                                onClick={toggleListening}
+                                className={`px-4 py-3 ${listening ? 'bg-red-500 hover:bg-red-600 animate-pulse' : 'bg-gray-700 hover:bg-gray-600'}`}
+                                title={listening ? "Stop Listening" : "Start Voice Input"}
+                            >
+                                {listening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                            </Button>
+                        )}
                     </div>
                     <p className="text-xs text-gray-500 mt-2 text-center">
                         Press Enter to send, Shift+Enter for new line

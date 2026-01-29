@@ -85,6 +85,13 @@ export default function ProfilePage() {
                         </div>
                         <Card className="grid md:grid-cols-2 gap-8 bg-white/[0.02] border-white/5">
                             <Input
+                                label="Age"
+                                type="number"
+                                value={formData.age || ''}
+                                onChange={(e) => setFormData({ ...formData, age: parseInt(e.target.value) })}
+                                className="bg-white/[0.03]"
+                            />
+                            <Input
                                 label="Education Level"
                                 value={formData.education_level || ''}
                                 onChange={(e) => setFormData({ ...formData, education_level: e.target.value })}

@@ -6,6 +6,10 @@ from datetime import datetime
 import json
 import os
 import traceback
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
+import requests
+import secrets
 
 from database import engine, get_db, Base
 from models import (
@@ -13,7 +17,7 @@ from models import (
     Task, ChatMessage, UserStage, ProfileStrength, TaskStatus
 )
 from schemas import (
-    UserCreate, UserLogin, UserResponse, Token,
+    UserCreate, UserLogin, GoogleLogin, UserResponse, Token,
     ProfileCreate, ProfileUpdate, ProfileResponse,
     UniversityResponse, ShortlistCreate, ShortlistResponse,
     TaskCreate, TaskUpdate, TaskResponse,
@@ -24,17 +28,27 @@ from auth import (
     get_current_active_user
 )
 from ai_counsellor import ai_counsellor
+from external_unis import external_search
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="AI Counsellor API", version="1.0.0")
 
+@app.on_event("startup")
+def startup_event():
+    # Run on startup to seed/initialize
+    Base.metadata.create_all(bind=engine)
+    # Background loader for global uni data
+    import threading
+    threading.Thread(target=external_search.load_data, daemon=True).start()
+    return {"status": "success", "message": "Backend is running with Global Research Engine"}
+
 # CORS
 frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3500")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[frontend_url, "http://localhost:3000", "http://localhost:3200"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -100,6 +114,84 @@ def login(user_data: UserLogin, db: Session = Depends(get_db)):
         "token_type": "bearer",
         "user": user
     }
+
+@app.post("/auth/google", response_model=Token)
+def google_login(login_data: GoogleLogin, db: Session = Depends(get_db)):
+    print(f"Received Google Login Request. Token prefix: {login_data.token[:10]}...")
+    email = None
+    name = ""
+    
+    # Try 1: Verify as ID Token (JWT)
+    try:
+        # Get Client ID from env or let library handle if only verifying signature
+        client_id = os.getenv("GOOGLE_CLIENT_ID")
+        
+        id_info = id_token.verify_oauth2_token(
+            login_data.token,
+            google_requests.Request(),
+            audience=client_id
+        )
+        
+        email = id_info['email']
+        name = id_info.get('name', '')
+        
+    except ValueError:
+        # Try 2: Verify as Access Token (fetch userinfo)
+        try:
+            response = requests.get(
+                "https://www.googleapis.com/oauth2/v3/userinfo",
+                headers={"Authorization": f"Bearer {login_data.token}"}
+            )
+            
+            if response.status_code == 200:
+                user_info = response.json()
+                email = user_info.get('email')
+                name = user_info.get('name', '')
+            else:
+                raise ValueError("Invalid access token")
+                
+        except Exception as e:
+            print(f"Access token verification failed: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid Google token"
+            )
+
+    if not email:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not retrieve email from Google token"
+        )
+        
+    try:
+        # Check if user exists
+        user = db.query(User).filter(User.email == email).first()
+        
+        if not user:
+            # Create user with random password
+            random_password = secrets.token_urlsafe(16)
+            hashed_password = get_password_hash(random_password)
+            
+            user = User(
+                email=email,
+                full_name=name,
+                hashed_password=hashed_password,
+                is_active=True
+            )
+            db.add(user)
+            db.commit()
+            db.refresh(user)
+        
+        access_token = create_access_token(data={"sub": user.email})
+        
+        return {
+            "access_token": access_token,
+            "token_type": "bearer",
+            "user": user
+        }
+    except Exception as e:
+        print(f"Google Login Database Error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Login processing failed: {str(e)}")
 
 @app.get("/auth/me", response_model=UserResponse)
 def get_current_user_info(current_user: User = Depends(get_current_active_user)):
@@ -249,13 +341,31 @@ def update_profile(
 @app.get("/universities", response_model=List[UniversityResponse])
 def get_universities(
     country: str = None,
+    scholarship: bool = None,
+    max_tuition: float = None,
+    major: str = None,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
     query = db.query(University)
     
     if country:
-        query = query.filter(University.country == country)
+        # Case insensitive partial match
+        query = query.filter(University.country.ilike(f"%{country}%"))
+    
+    if scholarship:
+        query = query.filter(University.scholarship_available == True)
+        
+    if max_tuition:
+        query = query.filter(University.tuition_fee_min <= max_tuition)
+        
+    if major:
+        # Simple text search within the JSON string/Text column
+        # In a real app with PG JSONB, we'd use '?' operator or similar
+        query = query.filter(University.programs.ilike(f"%{major}%"))
+    
+    # Order by ranking by default
+    query = query.order_by(University.ranking.asc().nulls_last())
     
     universities = query.all()
     return universities
@@ -312,6 +422,58 @@ def get_recommendations(
         })
     
     return serialized_recs
+
+@app.get("/external-universities/search")
+def search_global_universities(
+    country: str = None,
+    name: str = None,
+    limit: int = 40,
+    offset: int = 0,
+    current_user: User = Depends(get_current_active_user)
+):
+    """Search global university database (Hipo dataset)"""
+    results = external_search.search(country=country, name=name, limit=limit, offset=offset)
+    return results
+
+@app.post("/universities/import", response_model=UniversityResponse)
+def import_external_university(
+    uni_data: dict, # Expecting the Hipo object {name, country, web_pages...}
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    """Convert an external global university search result into a local record with AI enrichment"""
+    # Check if exists
+    name = uni_data.get('name')
+    existing = db.query(University).filter(University.name == name).first()
+    if existing:
+        return existing
+    
+    # Enrich with AI
+    from hipo_import import enrich_with_gemini
+    enriched = enrich_with_gemini([uni_data], uni_data.get('country'))
+    
+    if not enriched:
+        # Fallback to basic data if AI fails
+        new_uni = University(
+            name=name,
+            country=uni_data.get('country'),
+            city="Unknown",
+            ranking=1000,
+            programs=json.dumps(["General Studies"]),
+            website=uni_data.get('web_pages', [""])[0] if uni_data.get('web_pages') else ""
+        )
+    else:
+        # Use AI enriched data
+        data = enriched[0]
+        # Add scholarship logic
+        data['scholarship_available'] = True if data.get('ranking', 1000) < 500 else False
+        data['scholarship_details'] = "International merit based scholarships available." if data['scholarship_available'] else None
+        new_uni = University(**data)
+    
+    db.add(new_uni)
+    db.commit()
+    db.refresh(new_uni)
+    return new_uni
 
 # ==================== SHORTLIST ROUTES ====================
 

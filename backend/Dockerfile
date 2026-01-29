@@ -15,8 +15,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy backend code
 COPY . .
 
+# Copy entrypoint
+COPY entrypoint.sh .
+RUN chmod +x entrypoint.sh
+
 # Expose port
 EXPOSE 8000
 
-# Command to run the application using the dynamic PORT provided by hosting services like Railway
-CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+# Use entrypoint script
+ENTRYPOINT ["./entrypoint.sh"]

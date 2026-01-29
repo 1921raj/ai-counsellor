@@ -1,245 +1,293 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Card from '@/components/ui/Card';
+import { universityAPI, shortlistAPI, profileAPI } from '@/lib/api';
 import Button from '@/components/ui/Button';
-import { universityAPI, shortlistAPI } from '@/lib/api';
+import Input from '@/components/ui/Input';
+import Card from '@/components/ui/Card';
 import toast, { Toaster } from 'react-hot-toast';
-import {
-    GraduationCap,
-    MapPin,
-    Star,
-    Plus,
-    Check,
-    ArrowLeft,
-    ExternalLink,
-    Search as SearchIcon,
-    Sparkles,
-    TrendingUp
-} from 'lucide-react';
+import { Search, MapPin, GraduationCap, DollarSign, Bookmark, ArrowLeft, Filter, Sparkles, X, Globe, BookOpen, UserCheck, Activity, Send, Info, ExternalLink, Star } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function UniversitiesPage() {
     const router = useRouter();
-    const [recommendations, setRecommendations] = useState<any[]>([]);
-    const [shortlisted, setShortlisted] = useState<Set<number>>(new Set());
+    const [universities, setUniversities] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [activeFilter, setActiveFilter] = useState<'all' | 'dream' | 'target' | 'safe'>('all');
-    const [searchQuery, setSearchQuery] = useState('');
+    const [isImporting, setIsImporting] = useState(false);
+    const [selectedUni, setSelectedUni] = useState<any>(null);
+    const [isGlobalSearch, setIsGlobalSearch] = useState(false);
+    const [userProfile, setUserProfile] = useState<any>(null);
+    const [gridCols, setGridCols] = useState(4);
+
+    const [filters, setFilters] = useState({
+        country: '',
+        name: '',
+        major: '',
+        max_tuition: '',
+        scholarship: false
+    });
 
     useEffect(() => {
-        fetchData();
-    }, []);
+        fetchProfile();
+        fetchUniversities();
+    }, [isGlobalSearch]);
 
-    const fetchData = async () => {
+    const fetchProfile = async () => {
         try {
-            const [recsResponse, shortlistResponse] = await Promise.all([
-                universityAPI.getRecommendations(),
-                shortlistAPI.getAll()
-            ]);
+            const res = await profileAPI.get();
+            setUserProfile(res.data);
+        } catch (err) { }
+    };
 
-            setRecommendations(recsResponse.data);
-            const shortlistedIds = new Set<number>(shortlistResponse.data.map((s: any) => s.university_id));
-            setShortlisted(shortlistedIds);
-        } catch (error: any) {
-            if (error.response?.status === 401) {
-                router.push('/login');
+    const fetchUniversities = async () => {
+        setIsLoading(true);
+        try {
+            if (isGlobalSearch) {
+                const response = await universityAPI.searchGlobal({
+                    country: filters.country,
+                    name: filters.name,
+                    limit: 20 // 4x5 grid
+                });
+                setUniversities(response.data);
             } else {
-                toast.error('Failed to load universities');
+                const params: any = {};
+                if (filters.country) params.country = filters.country;
+                if (filters.major) params.major = filters.major;
+                if (filters.max_tuition) params.max_tuition = parseFloat(filters.max_tuition);
+                if (filters.scholarship) params.scholarship = true;
+
+                const response = await universityAPI.getAll(params);
+                setUniversities(response.data);
             }
+        } catch (error: any) {
+            console.error('Fetch error:', error);
+            const msg = error.response?.data?.detail || error.message || 'Unknown error';
+            toast.error(`Error: ${msg}`);
         } finally {
             setIsLoading(false);
         }
     };
 
-    const handleShortlist = async (university: any, category: string, fitScore: number, reasoning: string, riskLevel: string) => {
+    const handleShortlist = async (uni: any) => {
         try {
-            await shortlistAPI.add({
-                university_id: university.id,
-                category,
-                fit_score: fitScore,
-                risk_level: riskLevel,
-                ai_reasoning: reasoning
-            });
+            let targetUni = uni;
 
-            setShortlisted(prev => new Set(prev).add(university.id));
-            toast.success('Successfully shortlisted');
+            if (isGlobalSearch || !uni.id) {
+                setIsImporting(true);
+                const loadingToast = toast.loading('Enriching data with AI...', { id: 'import' });
+                const importRes = await universityAPI.importExternal(uni);
+                targetUni = importRes.data;
+                toast.success('Data enriched!', { id: 'import' });
+            }
+
+            await shortlistAPI.add({
+                university_id: targetUni.id,
+                category: 'target',
+                fit_score: calculateFitScore(targetUni),
+                risk_level: calculateRiskLevel(targetUni),
+                ai_reasoning: generateReasoning(targetUni)
+            });
+            toast.success('University shortlisted!');
+            setIsImporting(false);
+            if (isGlobalSearch) fetchUniversities(); // Refresh to show local ID if needed
         } catch (error: any) {
-            toast.error('Already in your shortlist');
+            setIsImporting(false);
+            toast.dismiss('import');
+            toast.error(error.response?.data?.detail || 'Failed to shortlist');
         }
     };
 
-    const categories = [
-        { id: 'all', label: 'All Picks', color: 'bg-white/5' },
-        { id: 'dream', label: 'Dream', color: 'bg-pink-500/10 text-pink-400' },
-        { id: 'target', label: 'Target', color: 'bg-indigo-500/10 text-indigo-400' },
-        { id: 'safe', label: 'Safe', color: 'bg-emerald-500/10 text-emerald-400' }
-    ];
+    const calculateFitScore = (uni: any) => {
+        if (!userProfile || !uni.min_gpa) return 85;
+        const gpaDiff = userProfile.gpa - uni.min_gpa;
+        if (gpaDiff >= 0.5) return 98;
+        if (gpaDiff >= 0) return 90;
+        if (gpaDiff >= -0.2) return 75;
+        return 60;
+    };
 
-    const filteredRecs = recommendations
-        .filter(r => activeFilter === 'all' || r.category === activeFilter)
-        .filter(r => r.university.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            r.university.country.toLowerCase().includes(searchQuery.toLowerCase()));
+    const calculateRiskLevel = (uni: any) => {
+        if (!userProfile || !uni.min_gpa) return 'Medium';
+        const gpaDiff = userProfile.gpa - uni.min_gpa;
+        if (gpaDiff >= 0.4) return 'SAFE';
+        if (gpaDiff >= 0.1) return 'TARGET';
+        return 'REACH';
+    };
 
-    if (isLoading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-bg-dark">
-                <div className="spinner" />
-            </div>
-        );
-    }
+    const generateReasoning = (uni: any) => {
+        if (!userProfile) return `Based on our data, ${uni.name} is a strong choice.`;
+        return `"Your GPA (${userProfile.gpa}) ${userProfile.gpa >= uni.min_gpa ? 'meets or exceeds' : 'is slightly below'} the requirement (${uni.min_gpa || 3.0}). This university represents a ${calculateRiskLevel(uni).toLowerCase()} match for your academic profile."`;
+    };
+
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        fetchUniversities();
+    };
 
     return (
-        <div className="min-h-screen pb-20 bg-bg-dark">
+        <div className="min-h-screen pb-20 bg-[#080808] text-text-main">
             <Toaster position="top-right" />
 
-            {/* Navigation / Header */}
-            <nav className="sticky top-0 z-50 border-b border-white/[0.05] bg-bg-dark/80 backdrop-blur-xl">
+            <nav className="sticky top-0 z-50 border-b border-white/[0.05] bg-black/80 backdrop-blur-xl">
                 <div className="container-custom h-20 flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                        <Button variant="ghost" size="sm" onClick={() => router.push('/dashboard')}>
+                            <ArrowLeft className="w-5 h-5 mr-2" />
+                            Back
+                        </Button>
+                        <h1 className="text-xl font-bold font-heading uppercase tracking-tighter">Institution Discovery</h1>
+                    </div>
+
                     <div className="flex items-center space-x-6">
-                        <button onClick={() => router.push('/dashboard')} className="p-2 hover:bg-white/5 rounded-full transition-colors">
-                            <ArrowLeft className="w-5 h-5 text-text-sub" />
-                        </button>
-                        <h1 className="text-xl font-bold tracking-tight">University Discovery</h1>
+                        {/* Grid Size Controls */}
+                        <div className="hidden xl:flex items-center bg-white/5 rounded-xl p-1 border border-white/10">
+                            {[2, 3, 4].map((n) => (
+                                <button
+                                    key={n}
+                                    onClick={() => setGridCols(n)}
+                                    className={`px-3 py-1 rounded-lg text-[10px] font-black transition-all ${gridCols === n ? 'bg-white/10 text-white' : 'text-text-dim hover:text-white'}`}
+                                >
+                                    {n} COL
+                                </button>
+                            ))}
+                        </div>
+
+                        <div className="flex items-center bg-white/5 rounded-full p-1 border border-white/10">
+                            <button
+                                onClick={() => setIsGlobalSearch(false)}
+                                className={`px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${!isGlobalSearch ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-900/40' : 'text-text-dim hover:text-white'}`}
+                            >
+                                Verified
+                            </button>
+                            <button
+                                onClick={() => setIsGlobalSearch(true)}
+                                className={`px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${isGlobalSearch ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-900/40' : 'text-text-dim hover:text-white'}`}
+                            >
+                                Global
+                            </button>
+                        </div>
                     </div>
                 </div>
             </nav>
 
-            <main className="container-custom pt-12">
-                {/* Search & Filters */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
-                    <div className="flex flex-wrap gap-2">
-                        {categories.map((cat) => (
-                            <button
-                                key={cat.id}
-                                onClick={() => setActiveFilter(cat.id as any)}
-                                className={`px-5 py-2 rounded-full text-xs font-bold transition-all ${activeFilter === cat.id
-                                        ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20'
-                                        : 'bg-white/[0.03] text-text-sub hover:bg-white/[0.08]'
-                                    }`}
-                            >
-                                {cat.label}
-                            </button>
-                        ))}
-                    </div>
+            <main className="container-custom pt-8">
+                {/* Search Bar */}
+                <Card className="glass-card mb-12 p-1 bg-white/[0.01] border-white/5 rounded-[2rem]">
+                    <form onSubmit={handleSearch} className="flex flex-col md:flex-row items-center gap-4 p-4">
+                        <div className="flex-1 relative w-full">
+                            <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-text-dim" />
+                            <input
+                                className="w-full h-16 bg-white/5 border border-white/10 rounded-2xl pl-16 pr-6 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
+                                placeholder={isGlobalSearch ? "Search any university in the world..." : "Search verified universities..."}
+                                value={isGlobalSearch ? filters.name : filters.country}
+                                onChange={(e) => setFilters({ ...filters, [isGlobalSearch ? 'name' : 'country']: e.target.value })}
+                            />
+                        </div>
+                        <Button type="submit" isLoading={isLoading} className="h-16 px-12 rounded-2xl bg-indigo-600 group">
+                            <span className="font-black uppercase tracking-widest text-[11px]">Execute Search</span>
+                        </Button>
+                    </form>
+                </Card>
 
-                    <div className="relative group min-w-[300px]">
-                        <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-dim group-focus-within:text-indigo-400 transition-colors" />
-                        <input
-                            type="text"
-                            placeholder="Find by name or country..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full h-12 bg-white/[0.03] border border-white/5 rounded-2xl pl-12 pr-6 text-sm focus:outline-none focus:border-indigo-600/50 transition-all font-medium"
-                        />
+                {/* Results Grid */}
+                {isLoading ? (
+                    <div className="flex flex-col items-center justify-center py-40">
+                        <div className="w-16 h-16 border-4 border-indigo-500/10 border-t-indigo-500 rounded-full animate-spin mb-6" />
+                        <p className="text-xs font-black text-text-dim uppercase tracking-[0.3em] animate-pulse">Scanning Databases...</p>
                     </div>
-                </div>
-
-                {/* Universities Grid */}
-                <div className="grid lg:grid-cols-2 gap-8">
-                    <AnimatePresence mode="popLayout">
-                        {filteredRecs.map((rec) => {
-                            const uni = rec.university;
-                            const isShortlisted = shortlisted.has(uni.id);
+                ) : (
+                    <div className={`grid md:grid-cols-2 ${gridCols === 2 ? 'lg:grid-cols-2' : gridCols === 3 ? 'lg:grid-cols-3' : 'lg:grid-cols-4'} gap-10`}>
+                        {universities.map((uni, idx) => {
+                            const fitScore = calculateFitScore(uni);
+                            const riskLevel = calculateRiskLevel(uni);
+                            const isGlobal = isGlobalSearch || !uni.id;
 
                             return (
                                 <motion.div
-                                    layout
-                                    initial={{ opacity: 0, scale: 0.95 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    exit={{ opacity: 0, scale: 0.95 }}
-                                    key={uni.id}
+                                    key={uni.id || uni.name + idx}
+                                    initial={{ opacity: 0, y: 30 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: idx * 0.05 }}
                                 >
-                                    <Card className="h-full flex flex-col hover:border-white/10 group">
+                                    <div className="bg-[#0f0f0f] border border-white/[0.08] rounded-[2.5rem] p-10 relative overflow-hidden group">
                                         {/* Top Meta */}
-                                        <div className="flex items-start justify-between mb-8">
-                                            <div className="space-y-1">
-                                                <div className="flex items-center space-x-2 mb-2">
-                                                    <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${rec.category === 'dream' ? 'bg-pink-500/10 text-pink-400' :
-                                                            rec.category === 'target' ? 'bg-indigo-500/10 text-indigo-400' : 'bg-emerald-500/10 text-emerald-400'
-                                                        }`}>
-                                                        {rec.category}
-                                                    </span>
-                                                    {uni.ranking && (
-                                                        <span className="text-[10px] font-bold text-text-dim flex items-center">
-                                                            <Star className="w-3 h-3 text-yellow-500 mr-1 fill-yellow-500" />
-                                                            Rank #{uni.ranking}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                                <h3 className="text-2xl font-black leading-snug group-hover:text-indigo-400 transition-colors">{uni.name}</h3>
-                                                <div className="flex items-center text-text-dim text-xs font-bold uppercase tracking-wider">
-                                                    <MapPin className="w-3 h-3 mr-1.5" />
-                                                    {uni.city}, {uni.country}
-                                                </div>
+                                        <div className="flex justify-between items-start mb-8">
+                                            <div className="flex items-center space-x-3">
+                                                <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${riskLevel === 'SAFE' ? 'bg-emerald-500/20 text-emerald-400' : riskLevel === 'TARGET' ? 'bg-indigo-500/20 text-indigo-400' : 'bg-orange-500/20 text-orange-400'}`}>
+                                                    {riskLevel}
+                                                </span>
+                                                <span className="flex items-center text-[10px] font-black text-white/40 uppercase tracking-widest">
+                                                    <Star className="w-3.5 h-3.5 mr-1.5 text-orange-400 fill-orange-400" />
+                                                    Rank #{uni.ranking || 'TBD'}
+                                                </span>
                                             </div>
-
                                             <div className="text-right">
-                                                <div className="text-[10px] font-bold text-text-dim uppercase mb-1">Fit Score</div>
-                                                <div className="text-3xl font-black text-white">{rec.fit_score.toFixed(0)}%</div>
+                                                <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-1">Fit Score</p>
+                                                <p className="text-4xl font-black text-white">{isGlobal ? '--' : `${fitScore}%`}</p>
                                             </div>
                                         </div>
 
-                                        {/* AI Reasoning Strip */}
-                                        <div className="p-4 bg-indigo-600/5 rounded-2xl border border-indigo-500/10 mb-8 flex items-start space-x-3">
-                                            <Sparkles className="w-4 h-4 text-indigo-400 flex-shrink-0 mt-0.5" />
-                                            <p className="text-xs text-text-sub font-medium leading-relaxed italic">
-                                                "{rec.reasoning}"
-                                            </p>
-                                        </div>
-
-                                        {/* Specs Grid */}
-                                        <div className="grid grid-cols-3 gap-4 mb-8">
-                                            <div className="space-y-1">
-                                                <span className="text-[10px] font-bold text-text-dim uppercase">Min GPA</span>
-                                                <p className="text-sm font-black text-text-main">{uni.min_gpa}</p>
-                                            </div>
-                                            <div className="space-y-1">
-                                                <span className="text-[10px] font-bold text-text-dim uppercase">Acceptance</span>
-                                                <p className="text-sm font-black text-text-main">{uni.acceptance_rate}%</p>
-                                            </div>
-                                            <div className="space-y-1">
-                                                <span className="text-[10px] font-bold text-text-dim uppercase">Est. Cost</span>
-                                                <p className="text-sm font-black text-emerald-400">${(uni.tuition_fee_max / 1000).toFixed(0)}K+</p>
+                                        {/* Title & Info */}
+                                        <div className="mb-10">
+                                            <h3 className="text-3xl font-black text-white mb-3 tracking-tighter uppercase leading-none">{uni.name}</h3>
+                                            <div className="flex items-center text-text-dim text-xs font-bold uppercase tracking-widest">
+                                                <MapPin className="w-4 h-4 mr-2" />
+                                                {uni.city ? `${uni.city.toUpperCase()}, ` : ''}{uni.country.toUpperCase()}
                                             </div>
                                         </div>
 
-                                        <div className="mt-auto pt-6 border-t border-white/5 flex items-center space-x-3">
+                                        {/* AI Box */}
+                                        <div className="bg-indigo-500/5 border border-indigo-500/20 rounded-3xl p-8 mb-10 relative group-hover:border-indigo-500/40 transition-colors">
+                                            <div className="flex items-start space-x-4">
+                                                <Sparkles className="w-6 h-6 text-indigo-400 shrink-0 mt-1" />
+                                                <p className="text-sm font-medium text-text-sub italic leading-relaxed">
+                                                    {isGlobal ? "Global institution detected. Shortlist to trigger full AI profile match analysis and verify entry requirements." : generateReasoning(uni)}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        {/* Stats Row */}
+                                        <div className="grid grid-cols-3 gap-8 mb-10 border-b border-white/5 pb-10">
+                                            <div>
+                                                <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-2">Min GPA</p>
+                                                <p className="text-xl font-black text-white">{uni.min_gpa || '3.0'}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-2 text-center">Acceptance</p>
+                                                <p className="text-xl font-black text-white text-center">{uni.acceptance_rate || '---'}%</p>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-2">Est. Cost</p>
+                                                <p className="text-xl font-black text-emerald-400">
+                                                    {uni.tuition_fee_min ? `$${Math.round(uni.tuition_fee_min / 1000)}K+` : '---'}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        {/* Actions */}
+                                        <div className="flex gap-4">
                                             <Button
-                                                onClick={() => !isShortlisted && handleShortlist(uni, rec.category, rec.fit_score, rec.reasoning, rec.risk_level)}
-                                                variant={isShortlisted ? 'outline' : 'primary'}
-                                                className="flex-1 h-12 rounded-xl text-xs font-bold uppercase tracking-widest"
-                                                disabled={isShortlisted}
+                                                className="flex-1 h-16 rounded-2xl bg-indigo-600 hover:bg-indigo-500 shadow-2xl shadow-indigo-900/20 border-none transition-all hover:scale-[1.02] active:scale-[0.98]"
+                                                onClick={() => handleShortlist(uni)}
+                                                disabled={isImporting}
                                             >
-                                                {isShortlisted ? (
-                                                    <><Check className="w-4 h-4 mr-2" /> Shortlisted</>
-                                                ) : (
-                                                    <><Plus className="w-4 h-4 mr-2" /> Shortlist</>
-                                                )}
+                                                <span className="font-black uppercase tracking-[0.2em] text-[11px] flex items-center">
+                                                    <Bookmark className="w-4 h-4 mr-3" />
+                                                    {isGlobal ? 'Enrich & Shortlist' : 'Add to Shortlist'}
+                                                </span>
                                             </Button>
                                             <button
-                                                onClick={() => window.open(uni.website, '_blank')}
-                                                className="p-3.5 bg-white/[0.03] hover:bg-white/10 rounded-xl transition-colors text-text-sub"
+                                                onClick={() => window.open(uni.website || `https://www.google.com/search?q=${uni.name}`, '_blank')}
+                                                className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-all text-white/60 hover:text-white"
                                             >
-                                                <ExternalLink className="w-4 h-4" />
+                                                <ExternalLink className="w-5 h-5" />
                                             </button>
                                         </div>
-                                    </Card>
+                                    </div>
                                 </motion.div>
                             );
                         })}
-                    </AnimatePresence>
-                </div>
-
-                {filteredRecs.length === 0 && (
-                    <div className="py-40 text-center space-y-4">
-                        <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6">
-                            <SearchIcon className="w-10 h-10 text-text-dim opacity-20" />
-                        </div>
-                        <h3 className="text-2xl font-black">No matches found</h3>
-                        <p className="text-text-sub font-medium max-w-sm mx-auto">Try adjusting your filters or refining your search query.</p>
-                        <Button variant="outline" onClick={() => { setActiveFilter('all'); setSearchQuery(''); }} className="mt-8 rounded-full">Clear Filters</Button>
                     </div>
                 )}
             </main>

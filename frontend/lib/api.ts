@@ -2,6 +2,8 @@ import axios from 'axios';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
+console.log('🔗 Connecting to Backend at:', API_BASE_URL); // Debug log
+
 export const api = axios.create({
     baseURL: API_BASE_URL,
     headers: {
@@ -24,6 +26,7 @@ export const authAPI = {
         api.post('/auth/signup', data),
     login: (data: { email: string; password: string }) =>
         api.post('/auth/login', data),
+    googleLogin: (token: string) => api.post('/auth/google', { token }),
     getMe: () => api.get('/auth/me'),
 };
 
@@ -36,9 +39,12 @@ export const profileAPI = {
 
 // University API
 export const universityAPI = {
-    getAll: (country?: string) =>
-        api.get('/universities', { params: { country } }),
+    getAll: (filters?: { country?: string; scholarship?: boolean; max_tuition?: number; major?: string }) =>
+        api.get('/universities', { params: filters }),
     getRecommendations: () => api.get('/universities/recommendations'),
+    searchGlobal: (params: { country?: string; name?: string; limit?: number; offset?: number }) =>
+        api.get('/external-universities/search', { params }),
+    importExternal: (uniData: any) => api.post('/universities/import', uniData),
 };
 
 // Shortlist API

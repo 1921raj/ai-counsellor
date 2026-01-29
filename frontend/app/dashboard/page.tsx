@@ -247,7 +247,11 @@ export default function DashboardPage() {
                                         </div>
                                         <div>
                                             <h4 className="font-bold text-lg">{dashboardData.user.full_name}</h4>
-                                            <p className="text-xs font-bold text-text-dim uppercase tracking-wider">{dashboardData.profile?.intended_degree} Applicant</p>
+                                            <div className="flex items-center space-x-2">
+                                                <span className="text-xs font-bold text-text-dim uppercase tracking-wider">{dashboardData.profile?.intended_degree} Applicant</span>
+                                                <span className="w-1 h-1 bg-white/20 rounded-full" />
+                                                <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider">{dashboardData.profile?.age} Years Old</span>
+                                            </div>
                                         </div>
                                     </div>
 

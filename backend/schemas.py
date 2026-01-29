@@ -13,6 +13,9 @@ class UserLogin(BaseModel):
     email: EmailStr
     password: str
 
+class GoogleLogin(BaseModel):
+    token: str
+
 class UserResponse(BaseModel):
     id: int
     email: str
@@ -37,6 +40,7 @@ class ProfileCreate(BaseModel):
     major: str
     graduation_year: int
     gpa: Optional[float] = None
+    age: Optional[int] = None
     intended_degree: str
     field_of_study: str
     target_intake_year: int
@@ -56,6 +60,7 @@ class ProfileUpdate(BaseModel):
     major: Optional[str] = None
     graduation_year: Optional[int] = None
     gpa: Optional[float] = None
+    age: Optional[int] = None
     intended_degree: Optional[str] = None
     field_of_study: Optional[str] = None
     target_intake_year: Optional[int] = None
@@ -77,6 +82,7 @@ class ProfileResponse(BaseModel):
     major: str
     graduation_year: int
     gpa: Optional[float]
+    age: Optional[int]
     intended_degree: str
     field_of_study: str
     target_intake_year: int
@@ -98,23 +104,25 @@ class ProfileResponse(BaseModel):
 
 # University Schemas
 class UniversityResponse(BaseModel):
-    id: int
-    name: str
-    country: str
-    city: Optional[str]
-    ranking: Optional[int]
-    programs: str
-    min_gpa: float
-    min_ielts: Optional[float]
-    min_toefl: Optional[int]
-    min_gre: Optional[int]
-    min_gmat: Optional[int]
-    tuition_fee_min: float
-    tuition_fee_max: float
-    living_cost_yearly: float
-    acceptance_rate: float
-    description: str
-    website: str
+    id: Optional[int] = None
+    name: str = "Unknown University"
+    country: str = "Global"
+    city: Optional[str] = None
+    ranking: Optional[int] = None
+    programs: Optional[str] = "[]"
+    min_gpa: Optional[float] = 3.0
+    min_ielts: Optional[float] = 6.5
+    min_toefl: Optional[int] = 80
+    min_gre: Optional[int] = None
+    min_gmat: Optional[int] = None
+    tuition_fee_min: Optional[float] = 0.0
+    tuition_fee_max: Optional[float] = 0.0
+    living_cost_yearly: Optional[float] = 0.0
+    acceptance_rate: Optional[float] = 0.0
+    description: Optional[str] = "Information pending AI review."
+    website: Optional[str] = None
+    scholarship_available: bool = False
+    scholarship_details: Optional[str] = None
     
     class Config:
         from_attributes = True
@@ -138,6 +146,7 @@ class ShortlistResponse(BaseModel):
     ai_reasoning: str
     created_at: datetime
     locked_at: Optional[datetime]
+    university: UniversityResponse
     
     class Config:
         from_attributes = True

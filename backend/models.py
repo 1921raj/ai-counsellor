@@ -55,6 +55,8 @@ class UserProfile(Base):
     major = Column(String)
     graduation_year = Column(Integer)
     gpa = Column(Float, nullable=True)
+    age = Column(Integer, nullable=True)
+    
     
     # Study Goals
     intended_degree = Column(String)
@@ -112,6 +114,10 @@ class University(Base):
     acceptance_rate = Column(Float)
     description = Column(Text)
     website = Column(String)
+    
+    # Financial Aid
+    scholarship_available = Column(Boolean, default=False)
+    scholarship_details = Column(Text, nullable=True)
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     

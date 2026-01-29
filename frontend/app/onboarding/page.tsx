@@ -10,10 +10,11 @@ import toast, { Toaster } from 'react-hot-toast';
 import { CheckCircle, ArrowRight, ArrowLeft } from 'lucide-react';
 
 const STEPS = [
-    { id: 1, title: 'Academic Background', description: 'Tell us about your education' },
-    { id: 2, title: 'Study Goals', description: 'What do you want to study?' },
-    { id: 3, title: 'Budget & Funding', description: 'Financial planning' },
-    { id: 4, title: 'Exams & Readiness', description: 'Test scores and preparation' },
+    { id: 1, title: 'Personal Details', description: 'Your basic information' },
+    { id: 2, title: 'Academic Background', description: 'Tell us about your education' },
+    { id: 3, title: 'Study Goals', description: 'What do you want to study?' },
+    { id: 4, title: 'Budget & Funding', description: 'Financial planning' },
+    { id: 5, title: 'Exams & Readiness', description: 'Test scores and preparation' },
 ];
 
 export default function OnboardingPage() {
@@ -21,6 +22,11 @@ export default function OnboardingPage() {
     const [currentStep, setCurrentStep] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState({
+        // Personal Details
+        full_name: '',
+        email: '',
+        age: '',
+
         // Academic Background
         education_level: '',
         degree: '',
@@ -47,8 +53,37 @@ export default function OnboardingPage() {
         sop_status: '',
     });
 
+    // Load user data on mount
+    useState(() => {
+        if (typeof window !== 'undefined') {
+            const userStr = localStorage.getItem('user');
+            if (userStr) {
+                try {
+                    const user = JSON.parse(userStr);
+                    setFormData(prev => ({
+                        ...prev,
+                        full_name: user.full_name || '',
+                        email: user.email || ''
+                    }));
+                } catch (e) {
+                    console.error('Error parsing user data', e);
+                }
+            }
+        }
+    });
+
     const handleNext = () => {
-        if (currentStep < 4) {
+        // Validation for Budget Step (Step 4)
+        if (currentStep === 4) {
+            const min = parseFloat(formData.budget_min);
+            const max = parseFloat(formData.budget_max);
+            if (!isNaN(min) && !isNaN(max) && min > max) {
+                toast.error('Minimum budget cannot be greater than maximum budget');
+                return;
+            }
+        }
+
+        if (currentStep < 5) {
             setCurrentStep(currentStep + 1);
         } else {
             handleSubmit();
@@ -68,6 +103,7 @@ export default function OnboardingPage() {
             // Convert string numbers to actual numbers
             const profileData = {
                 ...formData,
+                age: formData.age ? parseInt(formData.age.toString()) : null,
                 graduation_year: parseInt(formData.graduation_year.toString()),
                 target_intake_year: parseInt(formData.target_intake_year.toString()),
                 gpa: formData.gpa ? parseFloat(formData.gpa) : null,
@@ -94,6 +130,36 @@ export default function OnboardingPage() {
             case 1:
                 return (
                     <div className="space-y-6">
+                        <Input
+                            label="Full Name"
+                            value={formData.full_name}
+                            onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                            disabled // Typically name/email from signup are immutable here, or simplify by allowing edit
+                            className="opacity-60 cursor-not-allowed"
+                        />
+
+                        <Input
+                            label="Email"
+                            value={formData.email}
+                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                            disabled
+                            className="opacity-60 cursor-not-allowed"
+                        />
+
+                        <Input
+                            label="Age"
+                            type="number"
+                            placeholder="e.g., 22"
+                            value={formData.age}
+                            onChange={(e) => setFormData({ ...formData, age: e.target.value })}
+                            required
+                        />
+                    </div>
+                );
+
+            case 2:
+                return (
+                    <div className="space-y-6">
                         <div>
                             <label className="block text-sm font-medium text-gray-300 mb-2">Education Level</label>
                             <select
@@ -102,7 +168,7 @@ export default function OnboardingPage() {
                                 onChange={(e) => setFormData({ ...formData, education_level: e.target.value })}
                                 required
                             >
-                                <option value="">Select level</option>
+                                <option value="" className="text-gray-500">Select level</option>
                                 <option value="High School">High School</option>
                                 <option value="Undergraduate">Undergraduate</option>
                                 <option value="Graduate">Graduate</option>
@@ -147,7 +213,7 @@ export default function OnboardingPage() {
                     </div>
                 );
 
-            case 2:
+            case 3:
                 return (
                     <div className="space-y-6">
                         <div>
@@ -192,7 +258,7 @@ export default function OnboardingPage() {
                     </div>
                 );
 
-            case 3:
+            case 4:
                 return (
                     <div className="space-y-6">
                         <div className="grid grid-cols-2 gap-4">
@@ -233,62 +299,90 @@ export default function OnboardingPage() {
                     </div>
                 );
 
-            case 4:
+            case 5:
                 return (
-                    <div className="space-y-6">
-                        <div className="grid grid-cols-2 gap-4">
-                            <Input
-                                label="IELTS Score (Optional)"
-                                type="number"
-                                step="0.5"
-                                placeholder="7.5"
-                                value={formData.ielts_score}
-                                onChange={(e) => setFormData({ ...formData, ielts_score: e.target.value })}
-                            />
-
-                            <Input
-                                label="TOEFL Score (Optional)"
-                                type="number"
-                                placeholder="100"
-                                value={formData.toefl_score}
-                                onChange={(e) => setFormData({ ...formData, toefl_score: e.target.value })}
-                            />
+                    <div className="space-y-8">
+                        {/* Intro Note */}
+                        <div className="bg-indigo-500/10 border border-indigo-500/20 rounded-lg p-4">
+                            <p className="text-sm text-indigo-200">
+                                <strong>Note:</strong> These scores help us match you with universities that fit your profile.
+                                Don't worry if you haven't taken them yet; you can update this later.
+                            </p>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
-                            <Input
-                                label="GRE Score (Optional)"
-                                type="number"
-                                placeholder="320"
-                                value={formData.gre_score}
-                                onChange={(e) => setFormData({ ...formData, gre_score: e.target.value })}
-                            />
-
-                            <Input
-                                label="GMAT Score (Optional)"
-                                type="number"
-                                placeholder="700"
-                                value={formData.gmat_score}
-                                onChange={(e) => setFormData({ ...formData, gmat_score: e.target.value })}
-                            />
+                        {/* English Proficiency */}
+                        <div className="space-y-4">
+                            <div>
+                                <h3 className="text-lg font-semibold text-white">English Proficiency</h3>
+                                <p className="text-sm text-gray-400">Most international universities require proof of English skills.</p>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <Input
+                                    label="IELTS Score"
+                                    type="number"
+                                    step="0.5"
+                                    placeholder="e.g. 7.5"
+                                    value={formData.ielts_score}
+                                    onChange={(e) => setFormData({ ...formData, ielts_score: e.target.value })}
+                                />
+                                <Input
+                                    label="TOEFL Score"
+                                    type="number"
+                                    placeholder="e.g. 100"
+                                    value={formData.toefl_score}
+                                    onChange={(e) => setFormData({ ...formData, toefl_score: e.target.value })}
+                                />
+                            </div>
                         </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">SOP Status</label>
-                            <select
-                                className="w-full px-4 py-3 bg-[#1e1e3f] border border-[#2d2d4a] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                                value={formData.sop_status}
-                                onChange={(e) => setFormData({ ...formData, sop_status: e.target.value })}
-                                required
-                            >
-                                <option value="">Select status</option>
-                                <option value="Not started">Not started</option>
-                                <option value="Draft">Draft</option>
-                                <option value="Ready">Ready</option>
-                            </select>
+                        {/* Aptitude Tests */}
+                        <div className="space-y-4">
+                            <div>
+                                <h3 className="text-lg font-semibold text-white">Standardized Tests</h3>
+                                <p className="text-sm text-gray-400">GRE/GMAT may be required for some graduate programs.</p>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <Input
+                                    label="GRE Score"
+                                    type="number"
+                                    placeholder="e.g. 320"
+                                    value={formData.gre_score}
+                                    onChange={(e) => setFormData({ ...formData, gre_score: e.target.value })}
+                                />
+                                <Input
+                                    label="GMAT Score"
+                                    type="number"
+                                    placeholder="e.g. 700"
+                                    value={formData.gmat_score}
+                                    onChange={(e) => setFormData({ ...formData, gmat_score: e.target.value })}
+                                />
+                            </div>
+                        </div>
+
+                        {/* SOP */}
+                        <div className="space-y-4">
+                            <div>
+                                <h3 className="text-lg font-semibold text-white">Statement of Purpose (SOP)</h3>
+                                <p className="text-sm text-gray-400">Your personal essay to the admission committee.</p>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">Current Status</label>
+                                <select
+                                    className="w-full px-4 py-3 bg-[#1e1e3f] border border-[#2d2d4a] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                    value={formData.sop_status}
+                                    onChange={(e) => setFormData({ ...formData, sop_status: e.target.value })}
+                                    required
+                                >
+                                    <option value="" className="text-gray-500">Select status</option>
+                                    <option value="Not started">I haven't started yet</option>
+                                    <option value="Draft">I have a draft</option>
+                                    <option value="Ready">It's ready to submit</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                 );
+
 
             default:
                 return null;
@@ -314,8 +408,8 @@ export default function OnboardingPage() {
                                 <div className="flex flex-col items-center flex-1">
                                     <div
                                         className={`w-12 h-12 rounded-full flex items-center justify-center border-2 transition-all ${currentStep >= step.id
-                                                ? 'bg-indigo-500 border-indigo-500 text-white'
-                                                : 'border-gray-600 text-gray-600'
+                                            ? 'bg-indigo-500 border-indigo-500 text-white'
+                                            : 'border-gray-600 text-gray-600'
                                             }`}
                                     >
                                         {currentStep > step.id ? (
@@ -366,9 +460,9 @@ export default function OnboardingPage() {
 
                         <Button
                             onClick={handleNext}
-                            isLoading={isLoading && currentStep === 4}
+                            isLoading={isLoading && currentStep === 5}
                         >
-                            {currentStep === 4 ? 'Complete' : 'Next'}
+                            {currentStep === 5 ? 'Complete' : 'Next'}
                             <ArrowRight className="w-4 h-4 ml-2" />
                         </Button>
                     </div>

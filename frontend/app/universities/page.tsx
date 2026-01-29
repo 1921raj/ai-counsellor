@@ -52,6 +52,7 @@ export default function UniversitiesPage() {
                 setUniversities(response.data);
             } else {
                 const params: any = {};
+                if (filters.name) params.name = filters.name;
                 if (filters.country) params.country = filters.country;
                 if (filters.major) params.major = filters.major;
                 if (filters.max_tuition) params.max_tuition = parseFloat(filters.max_tuition);
@@ -179,9 +180,9 @@ export default function UniversitiesPage() {
                             <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-text-dim" />
                             <input
                                 className="w-full h-16 bg-white/5 border border-white/10 rounded-2xl pl-16 pr-6 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
-                                placeholder={isGlobalSearch ? "Search any university in the world..." : "Search verified universities..."}
-                                value={isGlobalSearch ? filters.name : filters.country}
-                                onChange={(e) => setFilters({ ...filters, [isGlobalSearch ? 'name' : 'country']: e.target.value })}
+                                placeholder={isGlobalSearch ? "Search any university in the world..." : "Search by name or country..."}
+                                value={filters.name}
+                                onChange={(e) => setFilters({ ...filters, name: e.target.value })}
                             />
                         </div>
                         <Button type="submit" isLoading={isLoading} className="h-16 px-12 rounded-2xl bg-indigo-600 group">
@@ -214,17 +215,17 @@ export default function UniversitiesPage() {
                                         {/* Top Meta */}
                                         <div className="flex justify-between items-start mb-8">
                                             <div className="flex items-center space-x-3">
-                                                <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${riskLevel === 'SAFE' ? 'bg-emerald-500/20 text-emerald-400' : riskLevel === 'TARGET' ? 'bg-indigo-500/20 text-indigo-400' : 'bg-orange-500/20 text-orange-400'}`}>
-                                                    {riskLevel}
+                                                <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${riskLevel.toUpperCase() === 'SAFE' ? 'bg-emerald-500/20 text-emerald-400' : riskLevel.toUpperCase() === 'REACH' ? 'bg-orange-500/20 text-orange-400' : 'bg-indigo-500/20 text-indigo-400'}`}>
+                                                    {riskLevel.toUpperCase()}
                                                 </span>
                                                 <span className="flex items-center text-[10px] font-black text-white/40 uppercase tracking-widest">
                                                     <Star className="w-3.5 h-3.5 mr-1.5 text-orange-400 fill-orange-400" />
-                                                    Rank #{uni.ranking || 'TBD'}
+                                                    RANK #{uni.ranking || 'TBD'}
                                                 </span>
                                             </div>
                                             <div className="text-right">
-                                                <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-1">Fit Score</p>
-                                                <p className="text-4xl font-black text-white">{isGlobal ? '--' : `${fitScore}%`}</p>
+                                                <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-1">FIT SCORE</p>
+                                                <p className="text-4xl font-black text-white leading-none tracking-tighter">{isGlobal ? '--' : `${fitScore}%`}</p>
                                             </div>
                                         </div>
 
@@ -250,15 +251,15 @@ export default function UniversitiesPage() {
                                         {/* Stats Row */}
                                         <div className="grid grid-cols-3 gap-8 mb-10 border-b border-white/5 pb-10">
                                             <div>
-                                                <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-2">Min GPA</p>
+                                                <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-2">MIN GPA</p>
                                                 <p className="text-xl font-black text-white">{uni.min_gpa || '3.0'}</p>
                                             </div>
                                             <div>
-                                                <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-2 text-center">Acceptance</p>
+                                                <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-2 text-center">ACCEPTANCE</p>
                                                 <p className="text-xl font-black text-white text-center">{uni.acceptance_rate || '---'}%</p>
                                             </div>
                                             <div className="text-right">
-                                                <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-2">Est. Cost</p>
+                                                <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-2">EST. COST</p>
                                                 <p className="text-xl font-black text-emerald-400">
                                                     {uni.tuition_fee_min ? `$${Math.round(uni.tuition_fee_min / 1000)}K+` : '---'}
                                                 </p>

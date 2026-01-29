@@ -251,6 +251,8 @@ export default function DashboardPage() {
                                                 <span className="text-xs font-bold text-text-dim uppercase tracking-wider">{dashboardData.profile?.intended_degree} Applicant</span>
                                                 <span className="w-1 h-1 bg-white/20 rounded-full" />
                                                 <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider">{dashboardData.profile?.age} Years Old</span>
+                                                <span className="w-1 h-1 bg-white/20 rounded-full" />
+                                                <span className="text-[10px] font-bold text-success/60 uppercase tracking-wider">GPA Standardized (4.0)</span>
                                             </div>
                                         </div>
                                     </div>

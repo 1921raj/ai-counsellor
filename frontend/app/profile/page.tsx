@@ -7,7 +7,7 @@ import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import { profileAPI } from '@/lib/api';
 import toast, { Toaster } from 'react-hot-toast';
-import { ArrowLeft, Save, GraduationCap, Briefcase, DollarSign, Award, ArrowUpRight } from 'lucide-react';
+import { ArrowLeft, Save, GraduationCap, Briefcase, DollarSign, Award, ArrowUpRight, Info } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function ProfilePage() {
@@ -15,6 +15,7 @@ export default function ProfilePage() {
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [formData, setFormData] = useState<any>({});
+    const [gpaScale, setGpaScale] = useState('4.0');
 
     useEffect(() => {
         fetchProfile();
@@ -33,14 +34,63 @@ export default function ProfilePage() {
 
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (isSaving) return;
+
         setIsSaving(true);
+        console.log('⏳ Saving profile data...', formData);
+
         try {
-            await profileAPI.update(formData);
+            // Helper to safely parse numbers or return null
+            const safeParseFloat = (val: any) => {
+                const parsed = parseFloat(val);
+                return isNaN(parsed) ? null : parsed;
+            };
+
+            const safeParseInt = (val: any) => {
+                const parsed = parseInt(val);
+                return isNaN(parsed) ? null : parsed;
+            };
+
+            // Calculate standardized GPA
+            const rawGpa = safeParseFloat(formData.gpa);
+            const standardizedGpa = rawGpa !== null
+                ? (gpaScale === '10.0' ? rawGpa * 0.4 : rawGpa)
+                : null;
+
+            const dataToUpdate = {
+                ...formData,
+                gpa: standardizedGpa,
+                age: safeParseInt(formData.age),
+                graduation_year: safeParseInt(formData.graduation_year),
+                target_intake_year: safeParseInt(formData.target_intake_year),
+                budget_min: safeParseFloat(formData.budget_min),
+                budget_max: safeParseFloat(formData.budget_max),
+                ielts_score: safeParseFloat(formData.ielts_score),
+                toefl_score: safeParseInt(formData.toefl_score),
+                gre_score: safeParseInt(formData.gre_score),
+                gmat_score: safeParseInt(formData.gmat_score),
+            };
+
+            console.log('Sending update to API:', dataToUpdate);
+            await profileAPI.update(dataToUpdate);
+
             toast.success('Profile updated successfully');
-            router.push('/dashboard');
-        } catch (error) {
-            toast.error('Failed to update profile');
-        } finally {
+
+            // Small delay to ensure toast is visible and state settles
+            setTimeout(() => {
+                router.push('/dashboard');
+                // Force a reload if router push seems to hang (fallback)
+                setTimeout(() => {
+                    if (window.location.pathname !== '/dashboard') {
+                        window.location.href = '/dashboard';
+                    }
+                }, 2000);
+            }, 500);
+
+        } catch (error: any) {
+            console.error('❌ Save error:', error);
+            const errorMsg = error.response?.data?.detail || 'Failed to update profile';
+            toast.error(errorMsg);
             setIsSaving(false);
         }
     };
@@ -66,7 +116,7 @@ export default function ProfilePage() {
                         </button>
                         <h1 className="text-xl font-bold tracking-tight">Edit Profile</h1>
                     </div>
-                    <Button onClick={handleSave} isLoading={isSaving} size="sm" className="rounded-full">
+                    <Button type="submit" isLoading={isSaving} size="sm" className="rounded-full">
                         <Save className="w-4 h-4 mr-2" />
                         Save
                     </Button>
@@ -88,7 +138,7 @@ export default function ProfilePage() {
                                 label="Age"
                                 type="number"
                                 value={formData.age || ''}
-                                onChange={(e) => setFormData({ ...formData, age: parseInt(e.target.value) })}
+                                onChange={(e) => setFormData({ ...formData, age: e.target.value ? parseInt(e.target.value) : null })}
                                 className="bg-white/[0.03]"
                             />
                             <Input
@@ -109,22 +159,44 @@ export default function ProfilePage() {
                                 onChange={(e) => setFormData({ ...formData, major: e.target.value })}
                                 className="bg-white/[0.03]"
                             />
-                            <div className="grid grid-cols-2 gap-4">
-                                <Input
-                                    label="GPA"
-                                    type="number"
-                                    step="0.01"
-                                    value={formData.gpa || ''}
-                                    onChange={(e) => setFormData({ ...formData, gpa: e.target.value })}
-                                    className="bg-white/[0.03]"
-                                />
-                                <Input
-                                    label="Class Of"
-                                    type="number"
-                                    value={formData.graduation_year || ''}
-                                    onChange={(e) => setFormData({ ...formData, graduation_year: e.target.value })}
-                                    className="bg-white/[0.03]"
-                                />
+                            <div className="space-y-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <div className="space-y-2">
+                                        <label className="block text-xs font-bold text-text-dim uppercase tracking-widest">GPA / CGPA</label>
+                                        <div className="flex space-x-2">
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                value={formData.gpa || ''}
+                                                onChange={(e) => setFormData({ ...formData, gpa: e.target.value || null })}
+                                                className="w-full h-14 bg-white/[0.03] border border-white/5 rounded-2xl px-6 text-sm font-medium focus:outline-none focus:border-indigo-600/50 transition-all text-white"
+                                            />
+                                            <select
+                                                value={gpaScale}
+                                                onChange={(e) => setGpaScale(e.target.value)}
+                                                className="w-32 h-14 bg-[#111] border border-white/10 rounded-2xl px-3 text-xs font-black focus:outline-none focus:border-indigo-600/50 transition-all text-white cursor-pointer"
+                                            >
+                                                <option value="4.0">/ 4.0</option>
+                                                <option value="10.0">/ 10.0</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <Input
+                                        label="Class Of"
+                                        type="number"
+                                        value={formData.graduation_year || ''}
+                                        onChange={(e) => setFormData({ ...formData, graduation_year: e.target.value })}
+                                        className="bg-white/[0.03]"
+                                    />
+                                </div>
+                                {formData.gpa && gpaScale === '10.0' && (
+                                    <div className="p-3 rounded-xl bg-indigo-500/5 border border-indigo-500/10 flex items-center space-x-3">
+                                        <Info className="w-4 h-4 text-indigo-400" />
+                                        <p className="text-[10px] font-bold text-indigo-200/60 uppercase tracking-widest">
+                                            Converted: {(parseFloat(formData.gpa) * 0.4).toFixed(2)} on Global 4.0 Scale
+                                        </p>
+                                    </div>
+                                )}
                             </div>
                         </Card>
                     </section>
@@ -154,7 +226,7 @@ export default function ProfilePage() {
                                 label="Target Intake"
                                 type="number"
                                 value={formData.target_intake_year || ''}
-                                onChange={(e) => setFormData({ ...formData, target_intake_year: e.target.value })}
+                                onChange={(e) => setFormData({ ...formData, target_intake_year: e.target.value ? parseInt(e.target.value) : null })}
                                 className="bg-white/[0.03]"
                             />
                             <Input

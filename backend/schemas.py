@@ -77,27 +77,27 @@ class ProfileUpdate(BaseModel):
 class ProfileResponse(BaseModel):
     id: int
     user_id: int
-    education_level: str
-    degree: str
-    major: str
-    graduation_year: int
-    gpa: Optional[float]
-    age: Optional[int]
-    intended_degree: str
-    field_of_study: str
-    target_intake_year: int
-    preferred_countries: str
-    budget_min: float
-    budget_max: float
-    funding_plan: str
-    ielts_score: Optional[float]
-    toefl_score: Optional[int]
-    gre_score: Optional[int]
-    gmat_score: Optional[int]
-    sop_status: str
-    academic_strength: ProfileStrength
-    exam_strength: ProfileStrength
-    sop_strength: ProfileStrength
+    education_level: Optional[str] = None
+    degree: Optional[str] = None
+    major: Optional[str] = None
+    graduation_year: Optional[int] = None
+    gpa: Optional[float] = None
+    age: Optional[int] = None
+    intended_degree: Optional[str] = None
+    field_of_study: Optional[str] = None
+    target_intake_year: Optional[int] = None
+    preferred_countries: Optional[str] = None
+    budget_min: Optional[float] = None
+    budget_max: Optional[float] = None
+    funding_plan: Optional[str] = None
+    ielts_score: Optional[float] = None
+    toefl_score: Optional[int] = None
+    gre_score: Optional[int] = None
+    gmat_score: Optional[int] = None
+    sop_status: Optional[str] = None
+    academic_strength: Optional[ProfileStrength] = None
+    exam_strength: Optional[ProfileStrength] = None
+    sop_strength: Optional[ProfileStrength] = None
     
     class Config:
         from_attributes = True

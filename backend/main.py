@@ -341,6 +341,7 @@ def update_profile(
 @app.get("/universities", response_model=List[UniversityResponse])
 def get_universities(
     country: str = None,
+    name: str = None,
     scholarship: bool = None,
     max_tuition: float = None,
     major: str = None,
@@ -353,6 +354,9 @@ def get_universities(
         # Case insensitive partial match
         query = query.filter(University.country.ilike(f"%{country}%"))
     
+    if name:
+        query = query.filter(University.name.ilike(f"%{name}%"))
+    
     if scholarship:
         query = query.filter(University.scholarship_available == True)
         
@@ -361,7 +365,6 @@ def get_universities(
         
     if major:
         # Simple text search within the JSON string/Text column
-        # In a real app with PG JSONB, we'd use '?' operator or similar
         query = query.filter(University.programs.ilike(f"%{major}%"))
     
     # Order by ranking by default

@@ -7,7 +7,7 @@ import Input from '@/components/ui/Input';
 import Card from '@/components/ui/Card';
 import { profileAPI } from '@/lib/api';
 import toast, { Toaster } from 'react-hot-toast';
-import { CheckCircle, ArrowRight, ArrowLeft } from 'lucide-react';
+import { CheckCircle, ArrowRight, ArrowLeft, Info } from 'lucide-react';
 
 const STEPS = [
     { id: 1, title: 'Personal Details', description: 'Your basic information' },
@@ -33,6 +33,7 @@ export default function OnboardingPage() {
         major: '',
         graduation_year: new Date().getFullYear(),
         gpa: '',
+        gpa_scale: '4.0', // Default scale
 
         // Study Goals
         intended_degree: '',
@@ -106,7 +107,7 @@ export default function OnboardingPage() {
                 age: formData.age ? parseInt(formData.age.toString()) : null,
                 graduation_year: parseInt(formData.graduation_year.toString()),
                 target_intake_year: parseInt(formData.target_intake_year.toString()),
-                gpa: formData.gpa ? parseFloat(formData.gpa) : null,
+                gpa: formData.gpa ? (formData.gpa_scale === '10.0' ? (parseFloat(formData.gpa) * 0.4) : parseFloat(formData.gpa)) : null,
                 budget_min: parseFloat(formData.budget_min),
                 budget_max: parseFloat(formData.budget_max),
                 ielts_score: formData.ielts_score ? parseFloat(formData.ielts_score) : null,
@@ -192,7 +193,7 @@ export default function OnboardingPage() {
                             required
                         />
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <Input
                                 label="Graduation Year"
                                 type="number"
@@ -201,14 +202,35 @@ export default function OnboardingPage() {
                                 required
                             />
 
-                            <Input
-                                label="GPA (Optional)"
-                                type="number"
-                                step="0.01"
-                                placeholder="e.g., 3.5"
-                                value={formData.gpa}
-                                onChange={(e) => setFormData({ ...formData, gpa: e.target.value })}
-                            />
+                            <div className="space-y-2">
+                                <label className="block text-sm font-bold text-white uppercase tracking-wider mb-1">GPA / CGPA</label>
+                                <div className="flex space-x-2">
+                                    <div className="flex-1">
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            placeholder={formData.gpa_scale === '10.0' ? "e.g., 8.5" : "e.g., 3.5"}
+                                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-text-dim/30 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-medium"
+                                            value={formData.gpa}
+                                            onChange={(e) => setFormData({ ...formData, gpa: e.target.value })}
+                                        />
+                                    </div>
+                                    <select
+                                        className="w-24 px-2 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-bold text-xs"
+                                        value={formData.gpa_scale}
+                                        onChange={(e) => setFormData({ ...formData, gpa_scale: e.target.value })}
+                                    >
+                                        <option value="4.0" className="bg-[#080808]">/ 4.0</option>
+                                        <option value="10.0" className="bg-[#080808]">/ 10.0</option>
+                                    </select>
+                                </div>
+                                {formData.gpa && formData.gpa_scale === '10.0' && (
+                                    <p className="text-[10px] text-text-dim flex items-center">
+                                        <Info className="w-3 h-3 mr-1 text-primary" />
+                                        Will be converted to {(parseFloat(formData.gpa) * 0.4).toFixed(2)} on a 4.0 scale
+                                    </p>
+                                )}
+                            </div>
                         </div>
                     </div>
                 );

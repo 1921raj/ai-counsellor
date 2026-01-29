@@ -6,7 +6,7 @@ import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import { chatAPI } from '@/lib/api';
 import toast, { Toaster } from 'react-hot-toast';
-import { ArrowLeft, Send, Bot, User, Sparkles, Mic, MicOff, Volume2, VolumeX } from 'lucide-react';
+import { ArrowLeft, Send, Bot, User, Sparkles, Mic, MicOff, Volume2, VolumeX, GraduationCap, Target, ExternalLink } from 'lucide-react';
 import 'regenerator-runtime/runtime';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 
@@ -114,6 +114,7 @@ export default function ChatPage() {
             const aiMessage = {
                 role: 'assistant',
                 content: response.data.message,
+                action_results: response.data.action_results,
                 created_at: new Date().toISOString()
             };
             setMessages(prev => [...prev, aiMessage]);
@@ -246,16 +247,54 @@ export default function ChatPage() {
                                         className={`flex-1 ${message.role === 'user' ? 'flex justify-end' : ''
                                             }`}
                                     >
-                                        <div
-                                            className={`inline-block max-w-[80%] p-4 rounded-2xl ${message.role === 'user'
-                                                ? 'bg-indigo-500 text-white'
-                                                : 'bg-[#1e1e3f] border border-[#2d2d4a]'
-                                                }`}
-                                        >
-                                            <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                                            <p className="text-xs opacity-50 mt-2">
-                                                {new Date(message.created_at).toLocaleTimeString()}
-                                            </p>
+                                        <div className="flex flex-col space-y-4">
+                                            <div
+                                                className={`inline-block max-w-[90%] p-4 rounded-2xl ${message.role === 'user'
+                                                    ? 'bg-indigo-500 text-white'
+                                                    : 'bg-[#1e1e3f] border border-[#2d2d4a]'
+                                                    }`}
+                                            >
+                                                <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
+                                                <p className="text-[10px] uppercase font-black tracking-widest opacity-30 mt-3">
+                                                    {new Date(message.created_at).toLocaleTimeString()}
+                                                </p>
+                                            </div>
+
+                                            {/* Action Results (e.g. University Search) */}
+                                            {message.action_results && message.action_results.map((result: any, rid: number) => (
+                                                <div key={rid} className="mt-2 space-y-4">
+                                                    {result.type === 'UNIVERSITY_SEARCH' && (
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                            {result.results.map((uni: any) => (
+                                                                <button
+                                                                    key={uni.id}
+                                                                    onClick={() => router.push(`/universities?id=${uni.id}`)}
+                                                                    className="p-1 border-glow rounded-2xl bg-white/[0.02] hover:bg-white/[0.05] transition-all text-left group"
+                                                                >
+                                                                    <div className="p-4 bg-[#0c0c0e] rounded-[calc(1rem-1px)] h-full">
+                                                                        <div className="flex justify-between items-start mb-3">
+                                                                            <span className="text-[9px] font-black uppercase text-indigo-400 bg-indigo-400/10 px-2 py-0.5 rounded tracking-widest">RANK #{uni.ranking}</span>
+                                                                            <Target className="w-3 h-3 text-text-dim group-hover:text-white transition-colors" />
+                                                                        </div>
+                                                                        <h4 className="font-bold text-sm mb-1 truncate group-hover:text-indigo-400 transition-colors">{uni.name}</h4>
+                                                                        <div className="flex items-center space-x-2 mb-4">
+                                                                            <span className="text-[10px] text-text-dim uppercase font-black tracking-tighter">{uni.country}</span>
+                                                                            <span className="w-1 h-1 bg-white/20 rounded-full" />
+                                                                            <span className="text-[10px] text-emerald-400 font-black uppercase">${uni.tuition?.toLocaleString()}/yr</span>
+                                                                        </div>
+                                                                        {uni.scholarship && (
+                                                                            <div className="flex items-center space-x-1 text-[8px] font-black uppercase text-purple-400 tracking-[0.2em] animate-pulse-glow">
+                                                                                <Sparkles className="w-2.5 h-2.5" />
+                                                                                <span>Scholarship Ready</span>
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ))}
                                         </div>
                                     </div>
                                 </div>

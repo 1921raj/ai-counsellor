@@ -49,23 +49,39 @@ def health_check():
 
 @app.on_event("startup")
 def startup_event():
-    # Run on startup to seed/initialize
-    Base.metadata.create_all(bind=engine)
-    
-    # Auto-seed if database is empty
-    from seed import seed_universities
-    db = next(get_db())
-    if db.query(University).count() == 0:
-        print("Production DB is empty. Initializing seed...")
+    # Helper to run initialization in background
+    def run_initialization():
         try:
-            seed_universities()
+            print("🚀 Starting background initialization...")
+            Base.metadata.create_all(bind=engine)
+            
+            # Auto-seed if database is empty
+            from seed import seed_universities
+            # Use a fresh session for the background thread
+            from database import SessionLocal
+            db = SessionLocal()
+            try:
+                if db.query(University).count() == 0:
+                    print("Production DB is empty. Initializing seed...")
+                    seed_universities()
+                else:
+                    print(f"Database already has {db.query(University).count()} universities.")
+            finally:
+                db.close()
+            
+            # Loader for global uni data
+            print("🌍 Loading global research engine data...")
+            external_search.load_data()
+            print("✅ Background initialization complete.")
         except Exception as e:
-            print(f"Seed failed during startup: {e}")
-    
-    # Background loader for global uni data
+            print(f"❌ Background initialization failed: {e}")
+            traceback.print_exc()
+
+    # Start initialization in background so health check passes immediately
     import threading
-    threading.Thread(target=external_search.load_data, daemon=True).start()
-    return {"status": "success", "message": "Backend is running with Global Research Engine"}
+    threading.Thread(target=run_initialization, daemon=True).start()
+    
+    return {"status": "success", "message": "Backend startup sequence initiated"}
 
 @app.get("/maintenance/seed")
 def seed_production_data(db: Session = Depends(get_db)):
@@ -796,18 +812,58 @@ async def chat_with_ai(
     
     # Execute actions if any
     if response.get("actions"):
+        action_results = []
         for action in response["actions"]:
-            execute_ai_action(action, current_user, db)
+            result = await execute_ai_action(action, current_user, db)
+            if result:
+                action_results.append(result)
+        
+        if action_results:
+            response["action_results"] = action_results
     
     return response
 
-def execute_ai_action(action: dict, user: User, db: Session):
+async def execute_ai_action(action: dict, user: User, db: Session):
     """Execute actions requested by AI"""
     try:
         action_name = action.get("action")
         params = action.get("params", {})
         
-        if action_name == "CREATE_TASK":
+        if action_name == "SEARCH_UNIVERSITIES":
+            # Extract filters
+            country = params.get("country")
+            max_pricing = params.get("max_pricing")
+            min_ranking = params.get("min_ranking")
+            scholarship_only = params.get("scholarship_only", False)
+            
+            # Perform DB search
+            query = db.query(University)
+            if country:
+                query = query.filter(University.country.ilike(f"%{country}%"))
+            if max_pricing:
+                query = query.filter(University.tuition_fee_min <= max_pricing)
+            if min_ranking:
+                query = query.filter(University.ranking >= min_ranking)
+            if scholarship_only:
+                query = query.filter(University.scholarship_available == True)
+            
+            universities = query.limit(5).all()
+            
+            # Format results for the frontend
+            results = []
+            for uni in universities:
+                results.append({
+                    "id": uni.id,
+                    "name": uni.name,
+                    "country": uni.country,
+                    "ranking": uni.ranking,
+                    "tuition": uni.tuition_fee_min,
+                    "scholarship": uni.scholarship_available
+                })
+            
+            return {"type": "UNIVERSITY_SEARCH", "results": results}
+            
+        elif action_name == "CREATE_TASK":
             priority = params.get("priority", 3)
             # Ensure priority is an integer
             if isinstance(priority, str):

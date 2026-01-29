@@ -20,6 +20,20 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
+// Handle 401 errors globally
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response?.status === 401) {
+            localStorage.removeItem('token');
+            if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
+                window.location.href = '/login';
+            }
+        }
+        return Promise.reject(error);
+    }
+);
+
 // Auth API
 export const authAPI = {
     signup: (data: { email: string; full_name: string; password: string }) =>

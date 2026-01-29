@@ -73,6 +73,38 @@ def seed_universities():
             "description": "A historic university offering a wide range of academic opportunities in the Scottish capital.",
             "website": "https://www.ed.ac.uk"
         },
+        {
+            "name": "University College London (UCL)",
+            "country": "United Kingdom",
+            "city": "London",
+            "ranking": 9,
+            "programs": "Architecture, Engineering, Law, Medicine, Computer Science",
+            "tuition_fee_min": 28000,
+            "tuition_fee_max": 42000,
+            "living_cost_yearly": 17000,
+            "scholarship_available": True,
+            "min_gpa": 3.6,
+            "min_ielts": 7.0,
+            "acceptance_rate": 48,
+            "description": "London's global university with world-class research and teaching.",
+            "website": "https://www.ucl.ac.uk"
+        },
+        {
+            "name": "King's College London",
+            "country": "United Kingdom",
+            "city": "London",
+            "ranking": 35,
+            "programs": "Law, Medicine, Humanities, Social Sciences",
+            "tuition_fee_min": 26000,
+            "tuition_fee_max": 38000,
+            "living_cost_yearly": 16500,
+            "scholarship_available": True,
+            "min_gpa": 3.4,
+            "min_ielts": 6.5,
+            "acceptance_rate": 52,
+            "description": "One of England's oldest and most prestigious universities.",
+            "website": "https://www.kcl.ac.uk"
+        },
         # --- UNITED STATES ---
         {
             "name": "Harvard University",
@@ -138,6 +170,70 @@ def seed_universities():
             "description": "A global university with campuses in NYC, Abu Dhabi, and Shanghai.",
             "website": "https://www.nyu.edu"
         },
+        {
+            "name": "University of California, Berkeley",
+            "country": "United States",
+            "city": "Berkeley, CA",
+            "ranking": 10,
+            "programs": "Computer Science, Engineering, Business, Social Sciences",
+            "tuition_fee_min": 45000,
+            "tuition_fee_max": 52000,
+            "living_cost_yearly": 20000,
+            "scholarship_available": True,
+            "min_gpa": 3.7,
+            "min_ielts": 7.0,
+            "acceptance_rate": 17,
+            "description": "A leading public research university with a strong emphasis on innovation.",
+            "website": "https://www.berkeley.edu"
+        },
+        {
+            "name": "University of Chicago",
+            "country": "United States",
+            "city": "Chicago, IL",
+            "ranking": 15,
+            "programs": "Economics, Law, Medicine, Social Sciences",
+            "tuition_fee_min": 60000,
+            "tuition_fee_max": 65000,
+            "living_cost_yearly": 19000,
+            "scholarship_available": True,
+            "min_gpa": 3.8,
+            "min_ielts": 7.5,
+            "acceptance_rate": 6,
+            "description": "Known for rigorous academics and influential research.",
+            "website": "https://www.uchicago.edu"
+        },
+        {
+            "name": "Columbia University",
+            "country": "United States",
+            "city": "New York, NY",
+            "ranking": 18,
+            "programs": "Journalism, Business, Law, Engineering",
+            "tuition_fee_min": 62000,
+            "tuition_fee_max": 68000,
+            "living_cost_yearly": 24000,
+            "scholarship_available": True,
+            "min_gpa": 3.8,
+            "min_ielts": 7.5,
+            "acceptance_rate": 6,
+            "description": "An Ivy League university in the heart of New York City.",
+            "website": "https://www.columbia.edu"
+        },
+        {
+            "name": "University of Pennsylvania",
+            "country": "United States",
+            "city": "Philadelphia, PA",
+            "ranking": 13,
+            "programs": "Business (Wharton), Engineering, Medicine, Law",
+            "tuition_fee_min": 61000,
+            "tuition_fee_max": 66000,
+            "living_cost_yearly": 18000,
+            "scholarship_available": True,
+            "min_gpa": 3.8,
+            "min_ielts": 7.5,
+            "acceptance_rate": 8,
+            "description": "Home to the prestigious Wharton School of Business.",
+            "website": "https://www.upenn.edu"
+        },
         # --- CANADA ---
         {
             "name": "University of Toronto",
@@ -187,6 +283,22 @@ def seed_universities():
             "description": "A world-class research university in the vibrant city of Montreal.",
             "website": "https://www.mcgill.ca"
         },
+        {
+            "name": "University of Waterloo",
+            "country": "Canada",
+            "city": "Waterloo",
+            "ranking": 149,
+            "programs": "Computer Science, Engineering, Mathematics, Co-op Programs",
+            "tuition_fee_min": 35000,
+            "tuition_fee_max": 48000,
+            "living_cost_yearly": 12000,
+            "scholarship_available": True,
+            "min_gpa": 3.5,
+            "min_ielts": 6.5,
+            "acceptance_rate": 53,
+            "description": "Canada's innovation hub with the world's largest co-op program.",
+            "website": "https://uwaterloo.ca"
+        },
         # --- AUSTRALIA ---
         {
             "name": "University of Melbourne",
@@ -220,6 +332,22 @@ def seed_universities():
             "description": "Australia's first university, known for its academic reputation and stunning campus.",
             "website": "https://www.sydney.edu.au"
         },
+        {
+            "name": "Australian National University",
+            "country": "Australia",
+            "city": "Canberra",
+            "ranking": 27,
+            "programs": "Political Science, International Relations, Science, Engineering",
+            "tuition_fee_min": 36000,
+            "tuition_fee_max": 47000,
+            "living_cost_yearly": 22000,
+            "scholarship_available": True,
+            "min_gpa": 3.5,
+            "min_ielts": 6.5,
+            "acceptance_rate": 35,
+            "description": "Australia's national research university located in the capital.",
+            "website": "https://www.anu.edu.au"
+        },
         # --- GERMANY ---
         {
             "name": "TU Munich (TUM)",
@@ -236,6 +364,38 @@ def seed_universities():
             "acceptance_rate": 8,
             "description": "One of Europe's top technical universities with very low tuition.",
             "website": "https://www.tum.de"
+        },
+        {
+            "name": "Ludwig Maximilian University of Munich",
+            "country": "Germany",
+            "city": "Munich",
+            "ranking": 59,
+            "programs": "Medicine, Law, Humanities, Natural Sciences",
+            "tuition_fee_min": 0,
+            "tuition_fee_max": 3000,
+            "living_cost_yearly": 11000,
+            "scholarship_available": True,
+            "min_gpa": 3.4,
+            "min_ielts": 6.5,
+            "acceptance_rate": 15,
+            "description": "One of Germany's oldest and most prestigious universities.",
+            "website": "https://www.lmu.de"
+        },
+        {
+            "name": "Heidelberg University",
+            "country": "Germany",
+            "city": "Heidelberg",
+            "ranking": 64,
+            "programs": "Medicine, Law, Natural Sciences, Humanities",
+            "tuition_fee_min": 0,
+            "tuition_fee_max": 3500,
+            "living_cost_yearly": 10000,
+            "scholarship_available": True,
+            "min_gpa": 3.3,
+            "min_ielts": 6.5,
+            "acceptance_rate": 18,
+            "description": "Germany's oldest university with a strong research tradition.",
+            "website": "https://www.uni-heidelberg.de"
         },
         # --- SWITZERLAND ---
         {
@@ -254,6 +414,22 @@ def seed_universities():
             "description": "A leading technical university in continental Europe.",
             "website": "https://ethz.ch"
         },
+        {
+            "name": "EPFL (École Polytechnique Fédérale de Lausanne)",
+            "country": "Switzerland",
+            "city": "Lausanne",
+            "ranking": 16,
+            "programs": "Engineering, Computer Science, Life Sciences",
+            "tuition_fee_min": 1500,
+            "tuition_fee_max": 2000,
+            "living_cost_yearly": 24000,
+            "scholarship_available": True,
+            "min_gpa": 3.7,
+            "min_ielts": 7.0,
+            "acceptance_rate": 12,
+            "description": "Switzerland's premier technical university with cutting-edge research.",
+            "website": "https://www.epfl.ch"
+        },
         # --- JAPAN ---
         {
             "name": "University of Tokyo",
@@ -270,6 +446,22 @@ def seed_universities():
             "acceptance_rate": 34,
             "description": "The top-ranked university in Japan for research and academia.",
             "website": "https://www.u-tokyo.ac.jp"
+        },
+        {
+            "name": "Kyoto University",
+            "country": "Japan",
+            "city": "Kyoto",
+            "ranking": 36,
+            "programs": "Science, Engineering, Medicine, Humanities",
+            "tuition_fee_min": 5000,
+            "tuition_fee_max": 8000,
+            "living_cost_yearly": 13000,
+            "scholarship_available": True,
+            "min_gpa": 3.6,
+            "min_ielts": 6.5,
+            "acceptance_rate": 38,
+            "description": "Japan's second-oldest university with a strong research focus.",
+            "website": "https://www.kyoto-u.ac.jp"
         },
         # --- SINGAPORE ---
         {
@@ -288,6 +480,22 @@ def seed_universities():
             "description": "Consistently ranked as Asia's top university.",
             "website": "https://www.nus.edu.sg"
         },
+        {
+            "name": "Nanyang Technological University (NTU)",
+            "country": "Singapore",
+            "city": "Singapore",
+            "ranking": 26,
+            "programs": "Engineering, Business, Science, Communication",
+            "tuition_fee_min": 28000,
+            "tuition_fee_max": 48000,
+            "living_cost_yearly": 9500,
+            "scholarship_available": True,
+            "min_gpa": 3.7,
+            "min_ielts": 6.5,
+            "acceptance_rate": 10,
+            "description": "A young and research-intensive university in Singapore.",
+            "website": "https://www.ntu.edu.sg"
+        },
         # --- NETHERLANDS ---
         {
             "name": "University of Amsterdam",
@@ -305,6 +513,22 @@ def seed_universities():
             "description": "A research-led university in the heart of Amsterdam with deep cultural roots.",
             "website": "https://www.uva.nl"
         },
+        {
+            "name": "Delft University of Technology",
+            "country": "Netherlands",
+            "city": "Delft",
+            "ranking": 57,
+            "programs": "Engineering, Architecture, Applied Sciences",
+            "tuition_fee_min": 12000,
+            "tuition_fee_max": 18000,
+            "living_cost_yearly": 11000,
+            "scholarship_available": True,
+            "min_gpa": 3.5,
+            "min_ielts": 6.5,
+            "acceptance_rate": 25,
+            "description": "The Netherlands' leading technical university.",
+            "website": "https://www.tudelft.nl"
+        },
         # --- FRANCE ---
         {
             "name": "Sorbonne University",
@@ -321,6 +545,206 @@ def seed_universities():
             "acceptance_rate": 20,
             "description": "A world-class university in the center of Paris, famous for its humanities.",
             "website": "https://www.sorbonne-universite.fr"
+        },
+        {
+            "name": "École Polytechnique",
+            "country": "France",
+            "city": "Palaiseau",
+            "ranking": 61,
+            "programs": "Engineering, Mathematics, Physics, Computer Science",
+            "tuition_fee_min": 0,
+            "tuition_fee_max": 12000,
+            "living_cost_yearly": 14000,
+            "scholarship_available": True,
+            "min_gpa": 3.7,
+            "min_ielts": 6.5,
+            "acceptance_rate": 8,
+            "description": "France's leading engineering school with a strong research focus.",
+            "website": "https://www.polytechnique.edu"
+        },
+        # --- SOUTH KOREA ---
+        {
+            "name": "Seoul National University",
+            "country": "South Korea",
+            "city": "Seoul",
+            "ranking": 41,
+            "programs": "Engineering, Business, Medicine, Humanities",
+            "tuition_fee_min": 6000,
+            "tuition_fee_max": 10000,
+            "living_cost_yearly": 10000,
+            "scholarship_available": True,
+            "min_gpa": 3.6,
+            "min_ielts": 6.5,
+            "acceptance_rate": 20,
+            "description": "South Korea's most prestigious university.",
+            "website": "https://www.snu.ac.kr"
+        },
+        {
+            "name": "KAIST (Korea Advanced Institute of Science and Technology)",
+            "country": "South Korea",
+            "city": "Daejeon",
+            "ranking": 56,
+            "programs": "Engineering, Computer Science, Natural Sciences",
+            "tuition_fee_min": 0,
+            "tuition_fee_max": 8000,
+            "living_cost_yearly": 9000,
+            "scholarship_available": True,
+            "min_gpa": 3.5,
+            "min_ielts": 6.5,
+            "acceptance_rate": 15,
+            "description": "South Korea's top science and technology university.",
+            "website": "https://www.kaist.ac.kr"
+        },
+        # --- HONG KONG ---
+        {
+            "name": "University of Hong Kong (HKU)",
+            "country": "Hong Kong",
+            "city": "Hong Kong",
+            "ranking": 26,
+            "programs": "Business, Law, Medicine, Engineering",
+            "tuition_fee_min": 18000,
+            "tuition_fee_max": 32000,
+            "living_cost_yearly": 12000,
+            "scholarship_available": True,
+            "min_gpa": 3.6,
+            "min_ielts": 6.5,
+            "acceptance_rate": 10,
+            "description": "Hong Kong's oldest and most prestigious university.",
+            "website": "https://www.hku.hk"
+        },
+        {
+            "name": "Hong Kong University of Science and Technology (HKUST)",
+            "country": "Hong Kong",
+            "city": "Hong Kong",
+            "ranking": 60,
+            "programs": "Engineering, Business, Science",
+            "tuition_fee_min": 16000,
+            "tuition_fee_max": 30000,
+            "living_cost_yearly": 11000,
+            "scholarship_available": True,
+            "min_gpa": 3.5,
+            "min_ielts": 6.5,
+            "acceptance_rate": 25,
+            "description": "A young research university focused on science and technology.",
+            "website": "https://www.ust.hk"
+        },
+        # --- IRELAND ---
+        {
+            "name": "Trinity College Dublin",
+            "country": "Ireland",
+            "city": "Dublin",
+            "ranking": 98,
+            "programs": "Computer Science, Business, Law, Humanities",
+            "tuition_fee_min": 18000,
+            "tuition_fee_max": 28000,
+            "living_cost_yearly": 13000,
+            "scholarship_available": True,
+            "min_gpa": 3.4,
+            "min_ielts": 6.5,
+            "acceptance_rate": 35,
+            "description": "Ireland's oldest university with a strong international reputation.",
+            "website": "https://www.tcd.ie"
+        },
+        # --- NEW ZEALAND ---
+        {
+            "name": "University of Auckland",
+            "country": "New Zealand",
+            "city": "Auckland",
+            "ranking": 87,
+            "programs": "Engineering, Business, Medicine, Arts",
+            "tuition_fee_min": 28000,
+            "tuition_fee_max": 40000,
+            "living_cost_yearly": 15000,
+            "scholarship_available": True,
+            "min_gpa": 3.3,
+            "min_ielts": 6.5,
+            "acceptance_rate": 45,
+            "description": "New Zealand's largest and highest-ranked university.",
+            "website": "https://www.auckland.ac.nz"
+        },
+        # --- SWEDEN ---
+        {
+            "name": "Lund University",
+            "country": "Sweden",
+            "city": "Lund",
+            "ranking": 75,
+            "programs": "Engineering, Science, Medicine, Humanities",
+            "tuition_fee_min": 0,
+            "tuition_fee_max": 15000,
+            "living_cost_yearly": 11000,
+            "scholarship_available": True,
+            "min_gpa": 3.4,
+            "min_ielts": 6.5,
+            "acceptance_rate": 30,
+            "description": "One of Scandinavia's largest and most prestigious universities.",
+            "website": "https://www.lu.se"
+        },
+        {
+            "name": "KTH Royal Institute of Technology",
+            "country": "Sweden",
+            "city": "Stockholm",
+            "ranking": 89,
+            "programs": "Engineering, Architecture, Technology",
+            "tuition_fee_min": 0,
+            "tuition_fee_max": 16000,
+            "living_cost_yearly": 12000,
+            "scholarship_available": True,
+            "min_gpa": 3.5,
+            "min_ielts": 6.5,
+            "acceptance_rate": 35,
+            "description": "Sweden's largest technical university.",
+            "website": "https://www.kth.se"
+        },
+        # --- ITALY ---
+        {
+            "name": "Politecnico di Milano",
+            "country": "Italy",
+            "city": "Milan",
+            "ranking": 123,
+            "programs": "Engineering, Architecture, Design",
+            "tuition_fee_min": 4000,
+            "tuition_fee_max": 8000,
+            "living_cost_yearly": 11000,
+            "scholarship_available": True,
+            "min_gpa": 3.3,
+            "min_ielts": 6.0,
+            "acceptance_rate": 40,
+            "description": "Italy's leading technical university.",
+            "website": "https://www.polimi.it"
+        },
+        # --- SPAIN ---
+        {
+            "name": "University of Barcelona",
+            "country": "Spain",
+            "city": "Barcelona",
+            "ranking": 184,
+            "programs": "Medicine, Humanities, Science, Social Sciences",
+            "tuition_fee_min": 2000,
+            "tuition_fee_max": 5000,
+            "living_cost_yearly": 10000,
+            "scholarship_available": True,
+            "min_gpa": 3.2,
+            "min_ielts": 6.0,
+            "acceptance_rate": 50,
+            "description": "Spain's top-ranked university with a rich history.",
+            "website": "https://www.ub.edu"
+        },
+        # --- BELGIUM ---
+        {
+            "name": "KU Leuven",
+            "country": "Belgium",
+            "city": "Leuven",
+            "ranking": 70,
+            "programs": "Engineering, Medicine, Science, Humanities",
+            "tuition_fee_min": 1000,
+            "tuition_fee_max": 6000,
+            "living_cost_yearly": 10000,
+            "scholarship_available": True,
+            "min_gpa": 3.4,
+            "min_ielts": 6.5,
+            "acceptance_rate": 30,
+            "description": "Belgium's largest and highest-ranked university.",
+            "website": "https://www.kuleuven.be"
         }
     ]
 

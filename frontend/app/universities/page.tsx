@@ -71,12 +71,7 @@ export default function UniversitiesPage() {
             }
         } catch (error: any) {
             console.error('Fetch error:', error);
-            if (error.response?.status === 401) {
-                router.push('/login');
-                toast.error('Session expired. Please login again.');
-            } else {
-                toast.error('Failed to sync with university core.');
-            }
+            toast.error('Failed to sync with university core.');
         } finally {
             setIsLoading(false);
         }
@@ -162,43 +157,43 @@ export default function UniversitiesPage() {
             <Toaster position="top-right" />
 
             {/* Header */}
-            <nav className="sticky top-0 z-50 border-b border-white/[0.05] bg-bg-dark/80 backdrop-blur-xl">
+            <nav className="sticky top-0 z-50 border-b border-white/[0.08] bg-bg-dark/90 backdrop-blur-2xl">
                 <div className="container-custom h-20 flex items-center justify-between">
                     <div className="flex items-center space-x-6">
-                        <button onClick={() => router.push('/dashboard')} className="p-3 hover:bg-white/5 rounded-2xl transition-all border border-transparent hover:border-white/10 group">
-                            <ArrowLeft className="w-5 h-5 text-text-sub group-hover:text-white" />
+                        <button onClick={() => router.push('/dashboard')} className="p-3 hover:bg-white/5 rounded-2xl transition-all border border-transparent hover:border-white/10 group shimmer">
+                            <ArrowLeft className="w-5 h-5 text-text-sub group-hover:text-white transition-colors" />
                         </button>
                         <div className="flex items-center space-x-3">
-                            <div className="w-10 h-10 bg-gradient-to-tr from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-600/20">
+                            <div className="w-10 h-10 bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-600/30 animate-pulse-glow">
                                 <Search className="w-6 h-6 text-white" />
                             </div>
-                            <h1 className="text-xl font-black tracking-tighter uppercase whitespace-nowrap">Institution Discovery</h1>
+                            <h1 className="text-xl font-black tracking-tighter uppercase whitespace-nowrap gradient-rainbow">Institution Discovery</h1>
                         </div>
                     </div>
 
                     <div className="flex items-center space-x-6">
-                        <div className="hidden xl:flex items-center bg-white/5 rounded-xl p-1 border border-white/10">
+                        <div className="hidden xl:flex items-center glass-card-premium rounded-xl p-1.5 border border-white/10">
                             {[2, 3, 4].map((n) => (
                                 <button
                                     key={n}
                                     onClick={() => setGridCols(n)}
-                                    className={`px-3 py-1 rounded-lg text-[10px] font-black transition-all ${gridCols === n ? 'bg-indigo-600 text-white shadow-lg' : 'text-text-dim hover:text-white'}`}
+                                    className={`px-4 py-2 rounded-lg text-[10px] font-black transition-all ${gridCols === n ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-600/40' : 'text-text-dim hover:text-white'}`}
                                 >
                                     {n} COL
                                 </button>
                             ))}
                         </div>
 
-                        <div className="flex items-center bg-white/5 rounded-full p-1 border border-white/10">
+                        <div className="flex items-center glass-card-premium rounded-full p-1.5 border border-white/10">
                             <button
                                 onClick={() => setIsGlobalSearch(false)}
-                                className={`px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${!isGlobalSearch ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-900/40' : 'text-text-dim hover:text-white'}`}
+                                className={`px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${!isGlobalSearch ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-xl shadow-indigo-900/50' : 'text-text-dim hover:text-white'}`}
                             >
                                 Verified
                             </button>
                             <button
                                 onClick={() => setIsGlobalSearch(true)}
-                                className={`px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${isGlobalSearch ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-900/40' : 'text-text-dim hover:text-white'}`}
+                                className={`px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${isGlobalSearch ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-xl shadow-indigo-900/50' : 'text-text-dim hover:text-white'}`}
                             >
                                 Global
                             </button>
@@ -210,12 +205,12 @@ export default function UniversitiesPage() {
             <main className="container-custom pt-12">
                 {/* Search & Filter Header */}
                 <div className="flex flex-col space-y-6 mb-12">
-                    <Card className="p-2 bg-white/[0.02] border-white/5 rounded-[2.5rem]">
+                    <Card className="p-2 glass-card-premium border-white/10 rounded-[2.5rem] shadow-2xl shadow-indigo-600/10">
                         <form onSubmit={handleSearch} className="flex flex-col md:flex-row items-center gap-4">
                             <div className="flex-1 relative w-full group">
                                 <Search className="absolute left-8 top-1/2 -translate-y-1/2 w-6 h-6 text-text-dim group-focus-within:text-indigo-400 transition-colors" />
                                 <input
-                                    className="w-full h-20 bg-white/[0.03] border border-white/5 rounded-[2rem] pl-20 pr-8 text-lg font-black tracking-tight focus:outline-none focus:border-indigo-600/50 transition-all placeholder:text-white/10 uppercase"
+                                    className="w-full h-20 bg-white/[0.03] border border-white/5 rounded-[2rem] pl-20 pr-8 text-lg font-black tracking-tight focus:outline-none focus:border-indigo-600/50 focus:bg-white/[0.05] transition-all placeholder:text-white/10 uppercase"
                                     placeholder={isGlobalSearch ? "Enter Global Target..." : "Search Verified Nodes..."}
                                     value={filters.name}
                                     onChange={(e) => setFilters({ ...filters, name: e.target.value })}
@@ -225,11 +220,11 @@ export default function UniversitiesPage() {
                                 <button
                                     type="button"
                                     onClick={() => setShowFilters(!showFilters)}
-                                    className={`h-20 w-20 flex items-center justify-center rounded-[2rem] border transition-all ${showFilters ? 'bg-indigo-600 border-indigo-500 text-white' : 'bg-white/5 border-white/10 text-white/40 hover:text-white hover:border-white/20'}`}
+                                    className={`h-20 w-20 flex items-center justify-center rounded-[2rem] border transition-all ${showFilters ? 'bg-gradient-to-r from-indigo-600 to-purple-600 border-indigo-500 text-white shadow-xl shadow-indigo-600/40' : 'bg-white/5 border-white/10 text-white/40 hover:text-white hover:border-white/20'}`}
                                 >
                                     <Filter className="w-6 h-6" />
                                 </button>
-                                <Button type="submit" isLoading={isLoading} className="flex-1 md:flex-none h-20 px-12 rounded-[2rem] text-sm font-black uppercase tracking-[0.3em] shadow-2xl shadow-indigo-600/20">
+                                <Button type="submit" isLoading={isLoading} className="flex-1 md:flex-none h-20 px-12 rounded-[2rem] text-sm font-black uppercase tracking-[0.3em] shadow-2xl shadow-indigo-600/30 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 border-t border-white/20 shimmer">
                                     Execute Protocol
                                 </Button>
                             </div>
@@ -328,11 +323,20 @@ export default function UniversitiesPage() {
                         <Button variant="outline" className="mt-10 h-16 px-12 rounded-[2rem] font-black uppercase tracking-widest" onClick={resetFilters}>Reset Global Filters</Button>
                     </div>
                 ) : (
-                    <div className={`grid md:grid-cols-2 ${gridCols === 2 ? 'lg:grid-cols-2' : gridCols === 3 ? 'lg:grid-cols-3' : 'lg:grid-cols-4'} gap-10`}>
+                    <div className={`grid md:grid-cols-2 ${gridCols === 2 ? 'lg:grid-cols-2' : gridCols === 3 ? 'lg:grid-cols-3' : 'lg:grid-cols-4'} gap-8`}>
                         {universities.map((uni, idx) => {
                             const fitScore = calculateFitScore(uni);
                             const riskLevel = calculateRiskLevel(uni);
                             const isGlobal = isGlobalSearch || !uni.id;
+
+                            // Rainbow color mapping for risk levels
+                            const riskColors = {
+                                'SAFE': { bg: 'bg-emerald-500/10', text: 'text-emerald-400', border: 'border-emerald-500/30', glow: 'shadow-emerald-500/20' },
+                                'TARGET': { bg: 'bg-cyan-500/10', text: 'text-cyan-400', border: 'border-cyan-500/30', glow: 'shadow-cyan-500/20' },
+                                'REACH': { bg: 'bg-orange-500/10', text: 'text-orange-400', border: 'border-orange-500/30', glow: 'shadow-orange-500/20' }
+                            };
+
+                            const colors = riskColors[riskLevel as keyof typeof riskColors] || riskColors['TARGET'];
 
                             return (
                                 <motion.div
@@ -340,75 +344,100 @@ export default function UniversitiesPage() {
                                     initial={{ opacity: 0, y: 30 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: idx * 0.03 }}
-                                    className="p-1 border-glow rounded-[3rem] group"
+                                    className="group relative"
                                 >
-                                    <div className="bg-[#0c0c0e] rounded-[calc(3rem-1px)] p-10 h-full flex flex-col">
-                                        {/* Status Header */}
-                                        <div className="flex justify-between items-start mb-8">
-                                            <div className="flex items-center space-x-3">
-                                                <div className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest ${riskLevel === 'SAFE' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : riskLevel === 'REACH' ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20' : 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'}`}>
-                                                    {riskLevel}
-                                                </div>
-                                                <div className="flex items-center text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">
-                                                    <Trophy className="w-3.5 h-3.5 mr-2 text-indigo-400" />
-                                                    RANK #{uni.ranking || 'TBD'}
-                                                </div>
-                                            </div>
-                                            <div className="text-right">
-                                                <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] mb-1">PROBABILITY</p>
-                                                <p className="text-4xl font-black text-white italic tracking-tighter">{isGlobal ? '??' : `${fitScore}%`}</p>
-                                            </div>
-                                        </div>
+                                    {/* Premium Glass Card with Rainbow Glow */}
+                                    <div className={`glass-card-premium p-8 h-full flex flex-col relative overflow-hidden border-rainbow hover:scale-[1.02] transition-all duration-300 ${colors.glow} shadow-2xl`}>
 
-                                        {/* Content */}
-                                        <div className="mb-10 flex-1">
-                                            <h3 className="text-3xl font-black text-white mb-3 leading-[0.9] tracking-tighter uppercase group-hover:text-indigo-400 transition-colors">{uni.name}</h3>
-                                            <div className="flex items-center text-[10px] font-black text-text-dim uppercase tracking-[0.2em]">
-                                                <MapPin className="w-4 h-4 mr-2 text-indigo-500" />
+                                        {/* Animated Background Gradient */}
+                                        <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/5 via-purple-600/5 to-pink-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                                        {/* Content Container */}
+                                        <div className="relative z-10 flex flex-col h-full">
+
+                                            {/* Header: Ranking Badge */}
+                                            <div className="flex items-center justify-between mb-6">
+                                                <div className={`flex items-center space-x-2 px-4 py-2 rounded-xl ${colors.bg} ${colors.border} border backdrop-blur-sm`}>
+                                                    <Trophy className={`w-4 h-4 ${colors.text}`} />
+                                                    <span className={`text-xs font-black ${colors.text} tracking-wider`}>
+                                                        #{uni.ranking || '???'}
+                                                    </span>
+                                                </div>
+
+                                                <div className={`px-4 py-2 rounded-xl ${colors.bg} ${colors.border} border backdrop-blur-sm`}>
+                                                    <span className={`text-xs font-black ${colors.text} tracking-wider uppercase`}>
+                                                        {riskLevel}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            {/* University Name */}
+                                            <h3 className="text-2xl font-black text-white mb-3 leading-tight tracking-tight group-hover:gradient-rainbow transition-all duration-300">
+                                                {uni.name}
+                                            </h3>
+
+                                            {/* Location */}
+                                            <div className="flex items-center text-xs font-bold text-text-sub mb-6 uppercase tracking-wide">
+                                                <MapPin className="w-4 h-4 mr-2 text-indigo-400" />
                                                 {uni.city ? `${uni.city}, ` : ''}{uni.country}
                                             </div>
-                                        </div>
 
-                                        {/* AI Analysis Insight */}
-                                        <div className="bg-white/[0.02] border border-white/5 rounded-3xl p-6 mb-10 relative">
-                                            <p className="text-[10px] font-medium text-text-sub italic leading-relaxed">
-                                                {isGlobal ? "Global institution protocol active. Deploy selection to analyze admission trajectory." : generateReasoning(uni)}
-                                            </p>
-                                            <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-600/40">
-                                                <Sparkles className="w-4 h-4 text-white" />
+                                            {/* Probability Score - Large & Centered */}
+                                            <div className="flex items-center justify-center py-8 mb-6 bg-white/[0.02] rounded-2xl border border-white/5 backdrop-blur-sm">
+                                                <div className="text-center">
+                                                    <p className="text-xs font-black text-white/40 uppercase tracking-widest mb-2">Match Score</p>
+                                                    <p className={`text-6xl font-black ${colors.text} tracking-tighter`}>
+                                                        {isGlobal ? '??' : `${fitScore}%`}
+                                                    </p>
+                                                </div>
                                             </div>
-                                        </div>
 
-                                        {/* Stats Grid */}
-                                        <div className="grid grid-cols-2 gap-4 mb-10">
-                                            <div className="bg-white/[0.01] border border-white/5 rounded-2xl p-4">
-                                                <p className="text-[9px] font-black text-white/20 uppercase mb-1">ACCEPTANCE</p>
-                                                <p className="text-lg font-black text-white">{uni.acceptance_rate || '---'}%</p>
+                                            {/* Stats Grid - Compact */}
+                                            <div className="grid grid-cols-2 gap-3 mb-6">
+                                                <div className="bg-white/[0.02] border border-white/5 rounded-xl p-4 text-center backdrop-blur-sm">
+                                                    <p className="text-[10px] font-black text-white/30 uppercase tracking-wider mb-1">Acceptance</p>
+                                                    <p className="text-xl font-black text-white">{uni.acceptance_rate || '---'}%</p>
+                                                </div>
+                                                <div className="bg-white/[0.02] border border-white/5 rounded-xl p-4 text-center backdrop-blur-sm">
+                                                    <p className="text-[10px] font-black text-white/30 uppercase tracking-wider mb-1">Tuition</p>
+                                                    <p className="text-xl font-black text-emerald-400">
+                                                        {uni.tuition_fee_min ? `$${(uni.tuition_fee_min / 1000).toFixed(0)}K+` : '---'}
+                                                    </p>
+                                                </div>
                                             </div>
-                                            <div className="bg-white/[0.01] border border-white/5 rounded-2xl p-4">
-                                                <p className="text-[9px] font-black text-white/20 uppercase mb-1">EST. TUITION</p>
-                                                <p className="text-lg font-black text-emerald-400">
-                                                    {uni.tuition_fee_min ? `$${(uni.tuition_fee_min / 1000).toFixed(0)}K+` : '---'}
-                                                </p>
-                                            </div>
-                                        </div>
 
-                                        {/* Actions */}
-                                        <div className="flex gap-4 mt-auto">
-                                            <Button
-                                                className="flex-1 h-16 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-[11px] font-black uppercase tracking-widest shadow-xl shadow-indigo-600/20 group/btn"
-                                                onClick={() => handleShortlist(uni)}
-                                                disabled={isImporting}
-                                            >
-                                                <Bookmark className="w-4 h-4 mr-3 group-hover/btn:rotate-12 transition-transform" />
-                                                {isGlobal ? 'Sync & Select' : 'Lock Target'}
-                                            </Button>
-                                            <button
-                                                onClick={() => window.open(uni.website || `https://www.google.com/search?q=${uni.name}`, '_blank')}
-                                                className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-all group/link"
-                                            >
-                                                <ExternalLink className="w-5 h-5 text-white/40 group-hover/link:text-white" />
-                                            </button>
+                                            {/* AI Insight - Simplified */}
+                                            <div className="bg-gradient-to-br from-indigo-600/10 to-purple-600/10 border border-indigo-500/20 rounded-xl p-4 mb-6 relative backdrop-blur-sm">
+                                                <div className="flex items-start space-x-3">
+                                                    <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center flex-shrink-0 shadow-lg shadow-indigo-600/40">
+                                                        <Sparkles className="w-4 h-4 text-white" />
+                                                    </div>
+                                                    <p className="text-[11px] font-medium text-indigo-200 leading-relaxed">
+                                                        {isGlobal
+                                                            ? "Global node detected. Import to analyze compatibility."
+                                                            : `GPA ${userProfile?.gpa || 'N/A'} ${userProfile?.gpa >= (uni.min_gpa || 3.0) ? 'exceeds' : 'meets'} requirement (${uni.min_gpa || 3.0})`
+                                                        }
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            {/* Action Buttons - Spacer */}
+                                            <div className="mt-auto flex gap-3">
+                                                <Button
+                                                    className={`flex-1 h-14 rounded-xl font-black text-xs uppercase tracking-widest shadow-xl ${colors.glow} bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 border-t border-white/20 group/btn`}
+                                                    onClick={() => handleShortlist(uni)}
+                                                    disabled={isImporting}
+                                                >
+                                                    <Bookmark className="w-4 h-4 mr-2 group-hover/btn:scale-110 transition-transform" />
+                                                    {isGlobal ? 'Import' : 'Shortlist'}
+                                                </Button>
+                                                <button
+                                                    onClick={() => window.open(uni.website || `https://www.google.com/search?q=${uni.name}`, '_blank')}
+                                                    className="w-14 h-14 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 hover:border-white/20 transition-all group/link"
+                                                >
+                                                    <ExternalLink className="w-5 h-5 text-white/40 group-hover/link:text-white transition-colors" />
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </motion.div>

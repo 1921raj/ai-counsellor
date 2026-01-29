@@ -34,7 +34,11 @@ export default function UniversitiesPage() {
         try {
             const res = await profileAPI.get();
             setUserProfile(res.data);
-        } catch (err) { }
+        } catch (err: any) {
+            if (err.response?.status === 401) {
+                router.push('/login');
+            }
+        }
     }, []);
 
     const fetchUniversities = useCallback(async () => {
@@ -52,18 +56,27 @@ export default function UniversitiesPage() {
                 if (filters.name) params.name = filters.name;
                 if (filters.country) params.country = filters.country;
                 if (filters.major) params.major = filters.major;
+
+                // Use raw USD from filters
                 if (filters.min_tuition) params.min_tuition = parseFloat(filters.min_tuition);
                 if (filters.max_tuition) params.max_tuition = parseFloat(filters.max_tuition);
+
                 if (filters.min_ranking) params.min_ranking = parseInt(filters.min_ranking);
                 if (filters.max_ranking) params.max_ranking = parseInt(filters.max_ranking);
                 if (filters.scholarship) params.scholarship = true;
 
+                console.log('🔍 Executing Discovery Protocol with params:', params);
                 const response = await universityAPI.getAll(params);
                 setUniversities(response.data);
             }
         } catch (error: any) {
             console.error('Fetch error:', error);
-            toast.error('Failed to sync with university core.');
+            if (error.response?.status === 401) {
+                router.push('/login');
+                toast.error('Session expired. Please login again.');
+            } else {
+                toast.error('Failed to sync with university core.');
+            }
         } finally {
             setIsLoading(false);
         }
@@ -245,7 +258,7 @@ export default function UniversitiesPage() {
                                         </div>
                                     </div>
                                     <div className="space-y-3">
-                                        <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.4em] ml-2">Budget Range ($K)</label>
+                                        <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.4em] ml-2">Budget Range ($)</label>
                                         <div className="flex gap-2">
                                             <input
                                                 className="w-1/2 h-14 bg-bg-dark/50 border border-white/5 rounded-2xl px-4 text-xs font-bold focus:outline-none focus:border-indigo-600"

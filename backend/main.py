@@ -39,10 +39,30 @@ app = FastAPI(title="AI Counsellor API", version="1.0.0")
 def startup_event():
     # Run on startup to seed/initialize
     Base.metadata.create_all(bind=engine)
+    
+    # Auto-seed if database is empty
+    from seed import seed_universities
+    db = next(get_db())
+    if db.query(University).count() == 0:
+        print("Production DB is empty. Initializing seed...")
+        try:
+            seed_universities()
+        except Exception as e:
+            print(f"Seed failed during startup: {e}")
+    
     # Background loader for global uni data
     import threading
     threading.Thread(target=external_search.load_data, daemon=True).start()
     return {"status": "success", "message": "Backend is running with Global Research Engine"}
+
+@app.get("/maintenance/seed")
+def seed_production_data(db: Session = Depends(get_db)):
+    from seed import seed_universities
+    try:
+        seed_universities()
+        return {"status": "success", "message": "Database seeded successfully!"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
 
 # CORS
 frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3500")

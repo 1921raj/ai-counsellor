@@ -7,7 +7,7 @@ import Input from '@/components/ui/Input';
 import Card from '@/components/ui/Card';
 import { profileAPI } from '@/lib/api';
 import toast, { Toaster } from 'react-hot-toast';
-import { CheckCircle, ArrowRight, ArrowLeft, Info } from 'lucide-react';
+import { CheckCircle, ArrowRight, ArrowLeft, Info, LogOut } from 'lucide-react';
 
 const STEPS = [
     { id: 1, title: 'Personal Details', description: 'Your basic information' },
@@ -53,6 +53,12 @@ export default function OnboardingPage() {
         gmat_score: '',
         sop_status: '',
     });
+
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        router.push('/');
+    };
 
     // Load user data on mount
     useState(() => {
@@ -417,7 +423,14 @@ export default function OnboardingPage() {
 
             <div className="max-w-3xl mx-auto">
                 {/* Header */}
-                <div className="text-center mb-12">
+                <div className="relative text-center mb-12">
+                    <button
+                        onClick={handleLogout}
+                        className="absolute right-0 top-0 flex items-center gap-2 px-4 py-2 text-sm text-text-dim hover:text-white transition-colors group"
+                    >
+                        <LogOut className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                        <span>Logout</span>
+                    </button>
                     <h1 className="text-4xl font-bold mb-4">Complete Your Profile</h1>
                     <p className="text-gray-400">Help us understand your background and goals</p>
                 </div>

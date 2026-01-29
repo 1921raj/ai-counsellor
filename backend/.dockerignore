@@ -12,5 +12,5 @@ test_key.py
 test_api.py
 list_models.py
 create_db.py
-seed.py
+# seed.py removed from ignore to allow production auto-seeding
 create_demo.py

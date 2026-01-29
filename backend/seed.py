@@ -1,70 +1,341 @@
-from database import SessionLocal, engine, Base
-from models import University
-import json
+from sqlalchemy.orm import Session
+from database import SessionLocal, engine
+from models import University, Base
 
 def seed_universities():
     db = SessionLocal()
-    
-    universities_data = [
-        # --- USA: STEM & IVY ---
-        { "name": "Massachusetts Institute of Technology (MIT)", "country": "USA", "city": "Cambridge, MA", "ranking": 1, "programs": json.dumps(["Computer Science", "Engineering", "Business", "Data Science"]), "min_gpa": 3.7, "min_ielts": 7.0, "min_toefl": 100, "min_gre": 325, "tuition_fee_min": 53000, "tuition_fee_max": 55000, "living_cost_yearly": 20000, "acceptance_rate": 4.0, "description": "World leader in tech and innovation.", "website": "https://www.mit.edu" },
-        { "name": "Stanford University", "country": "USA", "city": "Stanford, CA", "ranking": 2, "programs": json.dumps(["Computer Science", "MBA", "Engineering", "AI/ML"]), "min_gpa": 3.7, "min_ielts": 7.0, "min_toefl": 100, "min_gre": 325, "min_gmat": 730, "tuition_fee_min": 54000, "tuition_fee_max": 56000, "living_cost_yearly": 22000, "acceptance_rate": 3.9, "description": "Silicon Valley's premier research hub.", "website": "https://www.stanford.edu" },
-        { "name": "Harvard University", "country": "USA", "city": "Cambridge, MA", "ranking": 5, "programs": json.dumps(["Law", "Medicine", "Business", "Public Policy", "History"]), "min_gpa": 3.8, "min_ielts": 7.5, "min_toefl": 105, "tuition_fee_min": 55000, "tuition_fee_max": 60000, "living_cost_yearly": 22000, "acceptance_rate": 4.0, "description": "Global leader in law and social sciences.", "website": "https://www.harvard.edu" },
-        
-        # --- USA: Arts & Design ---
-        { "name": "Parsons School of Design", "country": "USA", "city": "New York, NY", "ranking": 150, "programs": json.dumps(["Fashion Design", "Fine Arts", "Graphic Design", "Interior Design"]), "min_gpa": 3.0, "min_ielts": 6.5, "tuition_fee_min": 48000, "tuition_fee_max": 52000, "living_cost_yearly": 25000, "acceptance_rate": 35.0, "description": "Top fashion and creative arts institution.", "website": "https://www.newschool.edu/parsons" },
-        { "name": "Rhode Island School of Design (RISD)", "country": "USA", "city": "Providence, RI", "ranking": 200, "programs": json.dumps(["Illustration", "Animation", "Architecture", "Fine Arts"]), "min_gpa": 3.2, "min_ielts": 7.0, "tuition_fee_min": 54000, "tuition_fee_max": 58000, "living_cost_yearly": 18000, "acceptance_rate": 19.0, "description": "Elite private design school.", "website": "https://www.risd.edu" },
-        { "name": "The Juilliard School", "country": "USA", "city": "New York, NY", "ranking": 300, "programs": json.dumps(["Music Performance", "Dance", "Drama"]), "min_gpa": 3.0, "min_ielts": 6.5, "tuition_fee_min": 50000, "tuition_fee_max": 55000, "living_cost_yearly": 24000, "acceptance_rate": 7.0, "description": "World-leading conservatory for performing arts.", "website": "https://www.juilliard.edu" },
-        
-        # --- USA: Medicine & Public Health ---
-        { "name": "Johns Hopkins University", "country": "USA", "city": "Baltimore, MD", "ranking": 28, "programs": json.dumps(["Medicine", "Public Health", "Biomedical Engineering"]), "min_gpa": 3.6, "min_ielts": 7.0, "tuition_fee_min": 52000, "tuition_fee_max": 58000, "living_cost_yearly": 18000, "acceptance_rate": 11.0, "description": "Top research in medical and health sectors.", "website": "https://www.jhu.edu" },
-        
-        # --- UK: Prestigious & Diverse ---
-        { "name": "University of Oxford", "country": "UK", "city": "Oxford", "ranking": 3, "programs": json.dumps(["Computer Science", "Engineering", "Philosophy", "Law", "History"]), "min_gpa": 3.7, "min_ielts": 7.5, "min_toefl": 110, "tuition_fee_min": 30000, "tuition_fee_max": 35000, "living_cost_yearly": 15000, "acceptance_rate": 17.5, "description": "Oldest and most prestigious English university.", "website": "https://www.ox.ac.uk" },
-        { "name": "London School of Economics (LSE)", "country": "UK", "city": "London", "ranking": 45, "programs": json.dumps(["Economics", "International Relations", "Sociology", "Data Science"]), "min_gpa": 3.5, "min_ielts": 7.5, "tuition_fee_min": 25000, "tuition_fee_max": 30000, "living_cost_yearly": 20000, "acceptance_rate": 12.0, "description": "Global hub for social science research.", "website": "https://www.lse.ac.uk" },
-        { "name": "Royal College of Music (RCM)", "country": "UK", "city": "London", "ranking": 120, "programs": json.dumps(["Music Performance", "Composition", "Conducting"]), "min_gpa": 3.0, "min_ielts": 6.5, "tuition_fee_min": 24000, "tuition_fee_max": 28000, "living_cost_yearly": 18000, "acceptance_rate": 18.0, "description": "Elite music education center.", "website": "https://www.rcm.ac.uk" },
-        { "name": "University of Cambridge", "country": "UK", "city": "Cambridge", "ranking": 4, "programs": json.dumps(["Computer Science", "Engineering", "Mathematics", "Physics"]), "min_gpa": 3.7, "min_ielts": 7.5, "min_toefl": 110, "tuition_fee_min": 30000, "tuition_fee_max": 35000, "living_cost_yearly": 14000, "acceptance_rate": 21.0, "description": "Leader in worldwide research and physics.", "website": "https://www.cam.ac.uk" },
-        
-        # --- Canada: Research & Environment ---
-        { "name": "University of Toronto", "country": "Canada", "city": "Toronto", "ranking": 18, "programs": json.dumps(["Computer Science", "Engineering", "Business", "Medicine", "Philosophy"]), "min_gpa": 3.5, "min_ielts": 7.0, "min_toefl": 100, "tuition_fee_min": 35000, "tuition_fee_max": 40000, "living_cost_yearly": 15000, "acceptance_rate": 43.0, "description": "Canada's top research powerhouse.", "website": "https://www.utoronto.ca" },
-        { "name": "University of British Columbia", "country": "Canada", "city": "Vancouver", "ranking": 34, "programs": json.dumps(["Environmental Science", "Forestry", "Marine Biology", "Psychology"]), "min_gpa": 3.3, "min_ielts": 6.5, "tuition_fee_min": 32000, "tuition_fee_max": 36000, "living_cost_yearly": 14000, "acceptance_rate": 52.0, "description": "Global leader in ecology and earth sciences.", "website": "https://www.ubc.ca" },
-        
-        # --- Europe: Architecture & Social Science ---
-        { "name": "Delft University of Technology", "country": "Netherlands", "city": "Delft", "ranking": 47, "programs": json.dumps(["Architecture", "Aerospace Engineering", "Urban Design"]), "min_gpa": 3.2, "min_ielts": 7.0, "tuition_fee_min": 16000, "tuition_fee_max": 20000, "living_cost_yearly": 12000, "acceptance_rate": 30.0, "description": "Top-ranked school for architecture.", "website": "https://www.tudelft.nl" },
-        { "name": "Wageningen University", "country": "Netherlands", "city": "Wageningen", "ranking": 125, "programs": json.dumps(["Agriculture", "Food Technology", "Environmental Science"]), "min_gpa": 3.0, "min_ielts": 6.5, "tuition_fee_min": 15000, "tuition_fee_max": 18000, "living_cost_yearly": 11000, "acceptance_rate": 45.0, "description": "World leader in climate and food science.", "website": "https://www.wur.nl" },
-        { "name": "Sciences Po", "country": "France", "city": "Paris", "ranking": 240, "programs": json.dumps(["Political Science", "International Relations", "Public Administration"]), "min_gpa": 3.3, "min_ielts": 7.0, "tuition_fee_min": 14000, "tuition_fee_max": 18000, "living_cost_yearly": 15000, "acceptance_rate": 10.0, "description": "Europe's elite for political studies.", "website": "https://www.sciencespo.fr" },
-        { "name": "Politecnico di Milano", "country": "Italy", "city": "Milan", "ranking": 139, "programs": json.dumps(["Industrial Design", "Architecture", "Automotive Engineering"]), "min_gpa": 3.0, "min_ielts": 6.0, "tuition_fee_min": 1500, "tuition_fee_max": 4000, "living_cost_yearly": 12000, "acceptance_rate": 25.0, "description": "Italy's crown jewel for industrial design.", "website": "https://www.polimi.it" },
-        
-        # --- Australia: Diverse branches ---
-        { "name": "Australian National University", "country": "Australia", "city": "Canberra", "ranking": 27, "programs": json.dumps(["Computer Science", "Law", "Business", "Political Science"]), "min_gpa": 3.3, "min_ielts": 6.5, "tuition_fee_min": 35000, "tuition_fee_max": 40000, "living_cost_yearly": 18000, "acceptance_rate": 35.0, "description": "Australia's top research school.", "website": "https://www.anu.edu.au" },
-        { "name": "University of Queensland", "country": "Australia", "city": "Brisbane", "ranking": 50, "programs": json.dumps(["Marine Biology", "Psychology", "Engineering", "Arts"]), "min_gpa": 3.0, "min_ielts": 6.5, "tuition_fee_min": 32000, "tuition_fee_max": 37000, "living_cost_yearly": 17000, "acceptance_rate": 60.0, "description": "Strong focus on science and arts.", "website": "https://www.uq.edu.au" },
-        
-        # --- Germany: Technical & Low Tuition ---
-        { "name": "Technical University of Munich", "country": "Germany", "city": "Munich", "ranking": 50, "programs": json.dumps(["Engineering", "CS", "Physics"]), "min_gpa": 3.0, "min_ielts": 6.5, "tuition_fee_min": 0, "tuition_fee_max": 3000, "living_cost_yearly": 12000, "acceptance_rate": 8.0, "description": "Top-tier technical school.", "website": "https://www.tum.de" },
-        
-        # --- Asia: Top STEM ---
-        { "name": "National University of Singapore (NUS)", "country": "Singapore", "city": "Singapore", "ranking": 11, "programs": json.dumps(["Computer Science", "Engineering", "Business", "Medicine", "Urban Planning"]), "min_gpa": 3.7, "min_ielts": 7.0, "tuition_fee_min": 25000, "tuition_fee_max": 30000, "living_cost_yearly": 15000, "acceptance_rate": 5.0, "description": "Asia's leading high-impact university.", "website": "https://www.nus.edu.sg" },
+    # Create tables if they don't exist
+    Base.metadata.create_all(bind=engine)
 
-        # --- Belgium: Biotech & Vet ---
-        { "name": "Ghent University", "country": "Belgium", "city": "Ghent", "ranking": 107, "programs": json.dumps(["Veterinary Medicine", "Biotech", "Psychology", "Fine Arts"]), "min_gpa": 3.0, "min_ielts": 6.5, "tuition_fee_min": 1000, "tuition_fee_max": 6000, "living_cost_yearly": 10000, "acceptance_rate": 40.0, "description": "Europe's leader in biotechnology.", "website": "https://www.ugent.be" }
+    universities = [
+        # --- UNITED KINGDOM ---
+        {
+            "name": "University of Oxford",
+            "country": "United Kingdom",
+            "city": "Oxford",
+            "ranking": 1,
+            "programs": "Arts, Humanities, Law, Medicine, Sciences, Engineering",
+            "tuition_fee_min": 35000,
+            "tuition_fee_max": 50000,
+            "living_cost_yearly": 15000,
+            "scholarship_available": True,
+            "min_gpa": 3.8,
+            "min_ielts": 7.5,
+            "acceptance_rate": 17,
+            "description": "One of the oldest and most prestigious universities in the world.",
+            "website": "https://www.ox.ac.uk"
+        },
+        {
+            "name": "University of Cambridge",
+            "country": "United Kingdom",
+            "city": "Cambridge",
+            "ranking": 2,
+            "programs": "Mathematics, Physics, Engineering, Law, History",
+            "tuition_fee_min": 33000,
+            "tuition_fee_max": 48000,
+            "living_cost_yearly": 14500,
+            "scholarship_available": True,
+            "min_gpa": 3.8,
+            "min_ielts": 7.5,
+            "acceptance_rate": 21,
+            "description": "A world-leading research university with a rich history of academic excellence.",
+            "website": "https://www.cam.ac.uk"
+        },
+        {
+            "name": "Imperial College London",
+            "country": "United Kingdom",
+            "city": "London",
+            "ranking": 6,
+            "programs": "Engineering, Medicine, Science, Business",
+            "tuition_fee_min": 32000,
+            "tuition_fee_max": 45000,
+            "living_cost_yearly": 18000,
+            "scholarship_available": True,
+            "min_gpa": 3.7,
+            "min_ielts": 7.0,
+            "acceptance_rate": 14,
+            "description": "Consistently ranked among the top universities for science and technology.",
+            "website": "https://www.imperial.ac.uk"
+        },
+        # --- UNITED STATES ---
+        {
+            "name": "Harvard University",
+            "country": "United States",
+            "city": "Cambridge, MA",
+            "ranking": 4,
+            "programs": "Law, Medicine, Business, Arts, Social Sciences",
+            "tuition_fee_min": 55000,
+            "tuition_fee_max": 65000,
+            "living_cost_yearly": 20000,
+            "scholarship_available": True,
+            "min_gpa": 3.9,
+            "min_ielts": 7.5,
+            "acceptance_rate": 5,
+            "description": "An Ivy League institution known for its global leadership and influence.",
+            "website": "https://www.harvard.edu"
+        },
+        {
+            "name": "Stanford University",
+            "country": "United States",
+            "city": "Stanford, CA",
+            "ranking": 3,
+            "programs": "Computer Science, Engineering, Entrepreneurship, Law",
+            "tuition_fee_min": 58000,
+            "tuition_fee_max": 62000,
+            "living_cost_yearly": 22000,
+            "scholarship_available": True,
+            "min_gpa": 3.9,
+            "min_ielts": 7.5,
+            "acceptance_rate": 4,
+            "description": "A hub for innovation and technology in the heart of Silicon Valley.",
+            "website": "https://www.stanford.edu"
+        },
+        {
+            "name": "MIT (Massachusetts Institute of Technology)",
+            "country": "United States",
+            "city": "Cambridge, MA",
+            "ranking": 5,
+            "programs": "Engineering, Physics, AI, Robotics, Economics",
+            "tuition_fee_min": 56000,
+            "tuition_fee_max": 60000,
+            "living_cost_yearly": 21000,
+            "scholarship_available": True,
+            "min_gpa": 3.9,
+            "min_ielts": 7.5,
+            "acceptance_rate": 7,
+            "description": "World-renowned for its pioneering research in science and engineering.",
+            "website": "https://www.mit.edu"
+        },
+        # --- CANADA ---
+        {
+            "name": "University of Toronto",
+            "country": "Canada",
+            "city": "Toronto",
+            "ranking": 21,
+            "programs": "Computer Science, Medicine, Arts, Engineering",
+            "tuition_fee_min": 45000,
+            "tuition_fee_max": 60000,
+            "living_cost_yearly": 15000,
+            "scholarship_available": True,
+            "min_gpa": 3.6,
+            "min_ielts": 7.0,
+            "acceptance_rate": 43,
+            "description": "Canada's top-ranked university with a vast array of programs.",
+            "website": "https://www.utoronto.ca"
+        },
+        {
+            "name": "University of British Columbia",
+            "country": "Canada",
+            "city": "Vancouver",
+            "ranking": 34,
+            "programs": "Science, Forestry, Arts, Business",
+            "tuition_fee_min": 40000,
+            "tuition_fee_max": 52000,
+            "living_cost_yearly": 16000,
+            "scholarship_available": True,
+            "min_gpa": 3.5,
+            "min_ielts": 6.5,
+            "acceptance_rate": 50,
+            "description": "Known for its beautiful campus and strong research output.",
+            "website": "https://www.ubc.ca"
+        },
+        # --- AUSTRALIA ---
+        {
+            "name": "University of Melbourne",
+            "country": "Australia",
+            "city": "Melbourne",
+            "ranking": 14,
+            "programs": "Business, Medicine, Engineering, Law",
+            "tuition_fee_min": 35000,
+            "tuition_fee_max": 48000,
+            "living_cost_yearly": 25000,
+            "scholarship_available": True,
+            "min_gpa": 3.4,
+            "min_ielts": 6.5,
+            "acceptance_rate": 70,
+            "description": "Australia's leading university with a focus on global impact.",
+            "website": "https://www.unimelb.edu.au"
+        },
+        {
+            "name": "Australian National University",
+            "country": "Australia",
+            "city": "Canberra",
+            "ranking": 30,
+            "programs": "Political Science, Law, Physics, International Relations",
+            "tuition_fee_min": 32000,
+            "tuition_fee_max": 45000,
+            "living_cost_yearly": 22000,
+            "scholarship_available": True,
+            "min_gpa": 3.5,
+            "min_ielts": 7.0,
+            "acceptance_rate": 35,
+            "description": "A research-intensive university in Australia's capital.",
+            "website": "https://www.anu.edu.au"
+        },
+        # --- GERMANY ---
+        {
+            "name": "TU Munich (TUM)",
+            "country": "Germany",
+            "city": "Munich",
+            "ranking": 37,
+            "programs": "Engineering, Computer Science, Physics, Management",
+            "tuition_fee_min": 0,
+            "tuition_fee_max": 6000,
+            "living_cost_yearly": 12000,
+            "scholarship_available": False,
+            "min_gpa": 3.3,
+            "min_ielts": 6.5,
+            "acceptance_rate": 8,
+            "description": "One of Europe's top technical universities with very low tuition.",
+            "website": "https://www.tum.de"
+        },
+        {
+            "name": "Ludwig Maximilian University of Munich (LMU)",
+            "country": "Germany",
+            "city": "Munich",
+            "ranking": 54,
+            "programs": "Medicine, Law, Humanities, Natural Sciences",
+            "tuition_fee_min": 0,
+            "tuition_fee_max": 1000,
+            "living_cost_yearly": 12000,
+            "scholarship_available": False,
+            "min_gpa": 3.5,
+            "min_ielts": 7.0,
+            "acceptance_rate": 10,
+            "description": "A premier research university with a tradition since 1472.",
+            "website": "https://www.lmu.de"
+        },
+        # --- SINGAPORE ---
+        {
+            "name": "National University of Singapore (NUS)",
+            "country": "Singapore",
+            "city": "Singapore",
+            "ranking": 8,
+            "programs": "Engineering, Computing, Business, Medicine",
+            "tuition_fee_min": 30000,
+            "tuition_fee_max": 50000,
+            "living_cost_yearly": 10000,
+            "scholarship_available": True,
+            "min_gpa": 3.8,
+            "min_ielts": 7.0,
+            "acceptance_rate": 5,
+            "description": "Consistently ranked as Asia's top university.",
+            "website": "https://www.nus.edu.sg"
+        },
+        {
+            "name": "Nanyang Technological University (NTU)",
+            "country": "Singapore",
+            "city": "Singapore",
+            "ranking": 15,
+            "programs": "Engineering, AI, Material Science, Science",
+            "tuition_fee_min": 28000,
+            "tuition_fee_max": 45000,
+            "living_cost_yearly": 10000,
+            "scholarship_available": True,
+            "min_gpa": 3.7,
+            "min_ielts": 6.5,
+            "acceptance_rate": 10,
+            "description": "A young and research-intensive university leading in tech.",
+            "website": "https://www.ntu.edu.sg"
+        },
+        # --- ARTS, DESIGN & FASHION ---
+        {
+            "name": "Royal College of Art",
+            "country": "United Kingdom",
+            "city": "London",
+            "ranking": 1,
+            "programs": "Design, Fine Art, Architecture, Communication",
+            "tuition_fee_min": 25000,
+            "tuition_fee_max": 35000,
+            "living_cost_yearly": 18000,
+            "scholarship_available": True,
+            "min_gpa": 3.2,
+            "min_ielts": 6.5,
+            "acceptance_rate": 15,
+            "description": "The world's most influential post-graduate art and design university.",
+            "website": "https://www.rca.ac.uk"
+        },
+        {
+            "name": "Parsons School of Design",
+            "country": "United States",
+            "city": "New York City",
+            "ranking": 2,
+            "programs": "Fashion Design, Fine Arts, Graphic Design",
+            "tuition_fee_min": 52000,
+            "tuition_fee_max": 56000,
+            "living_cost_yearly": 25000,
+            "scholarship_available": True,
+            "min_gpa": 3.0,
+            "min_ielts": 7.0,
+            "acceptance_rate": 35,
+            "description": "A global leader in design education located in the heart of NYC.",
+            "website": "https://www.newschool.edu/parsons"
+        },
+        # --- LAW & SOCIAL SCIENCES ---
+        {
+            "name": "Yale Law School",
+            "country": "United States",
+            "city": "New Haven, CT",
+            "ranking": 1,
+            "programs": "Law, Constitutional Law, International Law",
+            "tuition_fee_min": 68000,
+            "tuition_fee_max": 72000,
+            "living_cost_yearly": 20000,
+            "scholarship_available": True,
+            "min_gpa": 3.9,
+            "min_ielts": 7.5,
+            "acceptance_rate": 4,
+            "description": "Consistently ranked as the top law school in the United States.",
+            "website": "https://law.yale.edu"
+        },
+        {
+            "name": "London School of Economics (LSE)",
+            "country": "United Kingdom",
+            "city": "London",
+            "ranking": 45,
+            "programs": "Economics, Political Science, International Relations, Law",
+            "tuition_fee_min": 24000,
+            "tuition_fee_max": 32000,
+            "living_cost_yearly": 18000,
+            "scholarship_available": True,
+            "min_gpa": 3.7,
+            "min_ielts": 7.0,
+            "acceptance_rate": 9,
+            "description": "A world-class center for social science research and teaching.",
+            "website": "https://www.lse.ac.uk"
+        },
+        # --- MEDICINE & HEALTH ---
+        {
+            "name": "Johns Hopkins University",
+            "country": "United States",
+            "city": "Baltimore, MD",
+            "ranking": 28,
+            "programs": "Medicine, Public Health, Nursing, Biomedical Engineering",
+            "tuition_fee_min": 58000,
+            "tuition_fee_max": 62000,
+            "living_cost_yearly": 18000,
+            "scholarship_available": True,
+            "min_gpa": 3.9,
+            "min_ielts": 7.0,
+            "acceptance_rate": 8,
+            "description": "Renowned for its world-leading medical school and research.",
+            "website": "https://www.jhu.edu"
+        }
     ]
-    
-    count = 0
-    for uni_data in universities_data:
-        exists = db.query(University).filter(University.name == uni_data["name"]).first()
-        if not exists:
-            university = University(**uni_data)
-            db.add(university)
-            count += 1
+
+    for uni_data in universities:
+        existing = db.query(University).filter(University.name == uni_data["name"]).first()
+        if not existing:
+            uni = University(**uni_data)
+            db.add(uni)
         else:
-            # Update existing to ensure programs are diverse
-            exists.programs = uni_data["programs"]
-            exists.description = uni_data["description"]
+            # Update existing data
+            for key, value in uni_data.items():
+                setattr(existing, key, value)
     
     db.commit()
-    print(f"Successfully seeded {count} new universities and updated existing ones! Total in DB: {db.query(University).count()}")
+    print(f"Successfully seeded {len(universities)} diverse universities.")
     db.close()
 
 if __name__ == "__main__":
-    Base.metadata.create_all(bind=engine)
     seed_universities()

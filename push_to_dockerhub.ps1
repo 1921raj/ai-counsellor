@@ -5,8 +5,9 @@ $DockerUsername = "dockerforgit"
 $BackendImageName = "ai-counsellor-backend"
 $FrontendImageName = "ai-counsellor-frontend"
 $Tag = "latest"
-$Version = "v1.0.5"
+$Version = "v1.2.0"
 $GoogleClientId = "603527817862-hr6a8po12p97cv62f0q71ob5kmh93qiu.apps.googleusercontent.com"
+$RailwayBackendUrl = "https://ai-counsellor-backend-production.up.railway.app"
 
 Write-Host "`n╔════════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
 Write-Host "║         AI Counsellor - Docker Build & Push Script        ║" -ForegroundColor Cyan
@@ -54,7 +55,7 @@ Write-Host "📦 Building Frontend Image..." -ForegroundColor Cyan
 Write-Host "   Image: ${DockerUsername}/${FrontendImageName}:${Tag}" -ForegroundColor Gray
 docker build -t "${DockerUsername}/${FrontendImageName}:${Tag}" `
     -t "${DockerUsername}/${FrontendImageName}:${Version}" `
-    --build-arg NEXT_PUBLIC_API_URL=http://localhost:8000 `
+    --build-arg NEXT_PUBLIC_API_URL=$RailwayBackendUrl `
     --build-arg NEXT_PUBLIC_GOOGLE_CLIENT_ID=$GoogleClientId `
     ./frontend
 

@@ -442,6 +442,86 @@ Be helpful but extremely efficient and concise."""
             logger.error(f"Error generating reasoning: {str(e)}")
             return "Recommendation based on general profile match."
 
+    async def generate_application_tasks(
+        self,
+        user: User,
+        profile: UserProfile,
+        university: University,
+        db: Session
+    ) -> List[Dict]:
+        """Generate specific application tasks for a locked university"""
+        if self.use_mock or not self.model:
+            return self._generate_mock_tasks(university)
+
+        try:
+            prompt = f"""
+            Generate a list of 5 specific application tasks for {user.full_name} who is applying to {university.name} in {university.country}.
+            
+            STUDENT PROFILE:
+            - GPA: {profile.gpa}
+            - IELTS: {profile.ielts_score or 'Not taken'}
+            - Degree: {profile.intended_degree} in {profile.field_of_study}
+            
+            UNIVERSITY INFO:
+            - Name: {university.name}
+            - Ranking: {university.ranking}
+            - Requirements: GPA {university.min_gpa}, IELTS {university.min_ielts}
+            
+            OUTPUT FORMAT (Strict JSON):
+            [
+              {{"title": "Task Title", "description": "Specific action steps", "priority": 1-5}},
+              ...
+            ]
+            """
+            
+            response = self.model.generate_content(prompt)
+            if not response or not response.text:
+                return self._generate_mock_tasks(university)
+            
+            # Extract JSON from response
+            text = response.text
+            start = text.find('[')
+            end = text.rfind(']') + 1
+            if start != -1 and end != -1:
+                tasks_json = text[start:end]
+                tasks = json.loads(tasks_json)
+                return tasks
+            
+            return self._generate_mock_tasks(university)
+        except Exception as e:
+            logger.error(f"Error generating AI tasks: {str(e)}")
+            return self._generate_mock_tasks(university)
+
+    def _generate_mock_tasks(self, university: University) -> List[Dict]:
+        """Fallback mock tasks if AI fails"""
+        return [
+            {
+                "title": f"Review {university.name} Admission Portal",
+                "description": "Create an account and check specific document requirements.",
+                "priority": 5
+            },
+            {
+                "title": f"Prepare Transcripts for {university.name}",
+                "description": "Request official transcripts from your current institution.",
+                "priority": 4
+            },
+            {
+                "title": f"Draft SOP for {university.name}",
+                "description": "Tailor your statement of purpose to highlight why you fit this specific program.",
+                "priority": 4
+            },
+            {
+                "title": "Check Scholarship Deadlines",
+                "description": f"Research merit-based scholarships available for international students at {university.name}.",
+                "priority": 3
+            },
+            {
+                "title": "Financial Documentation",
+                "description": "Gather proof of funds as required by the university and visa guidelines.",
+                "priority": 3
+            }
+        ]
+
 # Global instance
 try:
     ai_counsellor = AICounsellor()

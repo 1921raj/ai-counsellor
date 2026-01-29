@@ -43,7 +43,10 @@ export default function ShortlistPage() {
     const handleLock = async (shortlistId: number) => {
         try {
             await shortlistAPI.lock({ shortlist_id: shortlistId, lock: true });
-            toast.success('University Locked! Application phase started.');
+            toast.success('UNIVERISTY LOCKED: AI roadmap generated for this institution!', {
+                duration: 5000,
+                icon: '🚀'
+            });
             fetchShortlist();
         } catch (error) {
             toast.error('Failed to lock university');

@@ -200,3 +200,16 @@ class ChatMessageResponse(BaseModel):
 class ChatRequest(BaseModel):
     message: str
     context: Optional[dict] = None
+
+class DashboardResponse(BaseModel):
+    user: UserResponse
+    profile: Optional[ProfileResponse] = None
+    current_stage: str
+    onboarding_completed: bool
+    tasks: List[TaskResponse]
+    shortlisted_count: int
+    locked_count: int
+    profile_strength: dict
+
+    class Config:
+        from_attributes = True

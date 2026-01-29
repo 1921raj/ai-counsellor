@@ -5,7 +5,7 @@ $DockerUsername = "dockerforgit"
 $BackendImageName = "ai-counsellor-backend"
 $FrontendImageName = "ai-counsellor-frontend"
 $Tag = "latest"
-$Version = "v1.0.4"
+$Version = "v1.0.5"
 $GoogleClientId = "603527817862-hr6a8po12p97cv62f0q71ob5kmh93qiu.apps.googleusercontent.com"
 
 Write-Host "`n╔════════════════════════════════════════════════════════════╗" -ForegroundColor Cyan

@@ -99,10 +99,25 @@ export default function DashboardPage() {
         );
     }
 
-    if (!dashboardData) return null;
+    if (!dashboardData) {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center bg-bg-dark text-white space-y-6">
+                <div className="w-16 h-16 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin" />
+                <div className="text-center">
+                    <p className="text-lg font-black uppercase tracking-[0.3em] animate-pulse">Initializing Neural Link</p>
+                    <p className="text-text-dim text-xs font-bold uppercase tracking-widest mt-2">Syncing your application protocol...</p>
+                </div>
+                {!isLoading && (
+                    <Button onClick={() => fetchDashboard()} variant="outline" className="mt-4 rounded-xl">
+                        Retry Connection
+                    </Button>
+                )}
+            </div>
+        );
+    }
 
-    const currentStage = dashboardData.current_stage || 'building_profile';
-    const stageInfo = STAGE_INFO[currentStage as keyof typeof STAGE_INFO];
+    const currentStage = dashboardData?.current_stage || 'building_profile';
+    const stageInfo = STAGE_INFO[currentStage as keyof typeof STAGE_INFO] || STAGE_INFO.building_profile;
 
     return (
         <div className="min-h-screen pb-20 relative overflow-x-hidden">
@@ -203,37 +218,71 @@ export default function DashboardPage() {
                         </section>
 
                         {/* Recent Tasks */}
-                        <section>
-                            <div className="flex items-center justify-between mb-6">
-                                <h3 className="text-sm font-bold text-text-dim uppercase tracking-widest">Active Roadmap</h3>
-                                <button className="text-xs font-bold text-indigo-400 hover:underline">View All Tasks</button>
+                        <section className="relative">
+                            <div className="flex items-center justify-between mb-8">
+                                <div className="flex items-center space-x-3">
+                                    <div className="w-8 h-8 rounded-lg bg-indigo-600/10 flex items-center justify-center">
+                                        <Sparkles className="w-4 h-4 text-indigo-400" />
+                                    </div>
+                                    <h3 className="text-xl font-black text-white uppercase tracking-tight">
+                                        {dashboardData.locked_count > 0 ? "AI Application Roadmap" : "Active Roadmap"}
+                                    </h3>
+                                </div>
+                                <button className="text-[10px] font-black text-indigo-400 hover:text-white transition-colors uppercase tracking-[0.2em]">View All Nodes</button>
                             </div>
-                            <div className="space-y-3">
+
+                            {dashboardData.locked_count > 0 && (
+                                <div className="mb-8 p-4 rounded-2xl bg-indigo-600/5 border border-indigo-500/10 backdrop-blur-md flex items-center space-x-4">
+                                    <div className="p-2 bg-indigo-500/20 rounded-xl">
+                                        <Clock className="w-5 h-5 text-indigo-400" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-xs font-black text-white uppercase tracking-widest">Application Phase Active</p>
+                                        <p className="text-[10px] text-text-dim font-medium uppercase tracking-wider">AI has generated custom precision tasks for your locked institutions.</p>
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="space-y-4">
                                 {tasks.length === 0 ? (
-                                    <div className="glass-card p-10 text-center">
-                                        <CheckCircle className="w-10 h-10 mx-auto mb-4 text-text-dim opacity-30" />
-                                        <p className="text-text-sub font-medium">All tasks completed! You're on track.</p>
+                                    <div className="border-glow rounded-[2rem] p-16 text-center bg-white/[0.01]">
+                                        <CheckCircle className="w-16 h-16 mx-auto mb-6 text-emerald-500/20" />
+                                        <p className="text-xl font-black text-white mb-2 uppercase tracking-tight">System Optimized</p>
+                                        <p className="text-text-sub text-sm font-medium leading-relaxed">All current operational nodes are clear. Await further instructions or explore new targets.</p>
                                     </div>
                                 ) : (
-                                    tasks.map((task) => (
-                                        <div key={task.id} className="glass-card p-5 group flex items-start space-x-4 bg-white/[0.01] hover:bg-white/[0.03] transition-colors">
-                                            <button
-                                                onClick={() => handleTaskComplete(task.id)}
-                                                className="mt-1 w-6 h-6 border-2 border-white/10 rounded-lg hover:border-indigo-500 transition-colors flex flex-shrink-0 items-center justify-center group-hover:bg-indigo-600/10"
-                                            >
-                                                <div className="w-2 h-2 bg-indigo-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
-                                            </button>
-                                            <div className="flex-1 min-w-0">
-                                                <h4 className="font-bold text-sm text-text-main mb-1">{task.title}</h4>
-                                                <p className="text-xs text-text-sub line-clamp-1">{task.description}</p>
-                                            </div>
-                                            <div className="flex items-center space-x-2">
-                                                <div className={`px-2 py-1 rounded text-[10px] font-black uppercase ${task.priority >= 4 ? 'bg-error/10 text-error' : 'bg-white/5 text-text-dim'
-                                                    }`}>
-                                                    Priority {task.priority}
+                                    tasks.map((task, i) => (
+                                        <motion.div
+                                            key={task.id}
+                                            initial={{ opacity: 0, x: -20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            transition={{ delay: i * 0.05 }}
+                                            className="p-1 border-glow rounded-3xl bg-white/[0.01] hover:bg-white/[0.03] transition-all group"
+                                        >
+                                            <div className="bg-[#0c0c0e] p-6 rounded-[calc(1.5rem-1px)] flex items-start space-x-6">
+                                                <button
+                                                    onClick={() => handleTaskComplete(task.id)}
+                                                    className="mt-1 w-8 h-8 border-2 border-white/10 rounded-xl hover:border-indigo-500 transition-all flex flex-shrink-0 items-center justify-center group-hover:bg-indigo-600/10 shadow-inner"
+                                                >
+                                                    <div className="w-2.5 h-2.5 bg-indigo-500 rounded-sm opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                </button>
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-center space-x-3 mb-1">
+                                                        <h4 className="font-black text-sm text-white uppercase tracking-tight group-hover:text-indigo-400 transition-colors">{task.title}</h4>
+                                                        {i < 3 && dashboardData.locked_count > 0 && (
+                                                            <span className="px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-[8px] font-black text-indigo-400 uppercase tracking-widest animate-pulse-glow">AI Node</span>
+                                                        )}
+                                                    </div>
+                                                    <p className="text-xs text-text-sub leading-relaxed font-medium line-clamp-2">{task.description}</p>
+                                                </div>
+                                                <div className="flex items-center min-w-fit">
+                                                    <div className={`px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest ${task.priority >= 4 ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' : 'bg-white/5 text-text-dim border border-white/10'
+                                                        }`}>
+                                                        Priority {task.priority}
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
+                                        </motion.div>
                                     ))
                                 )}
                             </div>

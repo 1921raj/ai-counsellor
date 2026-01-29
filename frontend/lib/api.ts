@@ -39,8 +39,15 @@ export const profileAPI = {
 
 // University API
 export const universityAPI = {
-    getAll: (filters?: { country?: string; scholarship?: boolean; max_tuition?: number; major?: string }) =>
-        api.get('/universities', { params: filters }),
+    getAll: (filters?: {
+        country?: string;
+        scholarship?: boolean;
+        min_tuition?: number;
+        max_tuition?: number;
+        min_ranking?: number;
+        max_ranking?: number;
+        major?: string
+    }) => api.get('/universities', { params: filters }),
     getRecommendations: () => api.get('/universities/recommendations'),
     searchGlobal: (params: { country?: string; name?: string; limit?: number; offset?: number }) =>
         api.get('/external-universities/search', { params }),

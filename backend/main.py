@@ -21,7 +21,7 @@ from schemas import (
     ProfileCreate, ProfileUpdate, ProfileResponse,
     UniversityResponse, ShortlistCreate, ShortlistResponse,
     TaskCreate, TaskUpdate, TaskResponse,
-    ChatMessageCreate, ChatMessageResponse, ChatRequest, LockUniversity
+    ChatMessageCreate, ChatMessageResponse, ChatRequest, LockUniversity, DashboardResponse
 )
 from auth import (
     get_password_hash, verify_password, create_access_token,
@@ -343,7 +343,10 @@ def get_universities(
     country: str = None,
     name: str = None,
     scholarship: bool = None,
+    min_tuition: float = None,
     max_tuition: float = None,
+    min_ranking: int = None,
+    max_ranking: int = None,
     major: str = None,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
@@ -362,6 +365,15 @@ def get_universities(
         
     if max_tuition:
         query = query.filter(University.tuition_fee_min <= max_tuition)
+
+    if min_tuition:
+        query = query.filter(University.tuition_fee_max >= min_tuition)
+
+    if min_ranking:
+        query = query.filter(University.ranking >= min_ranking)
+
+    if max_ranking:
+        query = query.filter(University.ranking <= max_ranking)
         
     if major:
         # Simple text search within the JSON string/Text column
@@ -526,7 +538,7 @@ def get_shortlist(
     return shortlist
 
 @app.post("/shortlist/lock")
-def lock_university(
+async def lock_university(
     lock_data: LockUniversity,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
@@ -547,6 +559,36 @@ def lock_university(
         shortlist.locked_at = datetime.utcnow()
         # Update user stage
         current_user.current_stage = UserStage.PREPARING_APPLICATIONS
+        
+        # Generate custom AI tasks for this university
+        try:
+            profile = current_user.profile
+            university = shortlist.university
+            
+            if profile and university:
+                # Generate tasks
+                ai_tasks = await ai_counsellor.generate_application_tasks(
+                    current_user, profile, university, db
+                )
+                
+                # Add tasks to DB
+                for t_data in ai_tasks:
+                    # Check for duplicates by title
+                    existing = db.query(Task).filter(
+                        Task.user_id == current_user.id,
+                        Task.title == t_data["title"]
+                    ).first()
+                    
+                    if not existing:
+                        new_task = Task(
+                            user_id=current_user.id,
+                            title=t_data["title"],
+                            description=t_data.get("description", ""),
+                            priority=t_data.get("priority", 3)
+                        )
+                        db.add(new_task)
+        except Exception as e:
+            print(f"Error generating tasks: {e}")
     else:
         shortlist.locked_at = None
     
@@ -827,7 +869,7 @@ def execute_ai_action(action: dict, user: User, db: Session):
 
 # ==================== DASHBOARD ROUTE ====================
 
-@app.get("/dashboard")
+@app.get("/dashboard", response_model=DashboardResponse)
 def get_dashboard(
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
@@ -848,17 +890,49 @@ def get_dashboard(
     locked = [s for s in shortlisted if s.is_locked]
     
     return {
-        "user": current_user,
-        "profile": profile,
-        "current_stage": current_user.current_stage,
+        "user": {
+            "id": current_user.id,
+            "email": current_user.email,
+            "full_name": current_user.full_name,
+            "is_active": current_user.is_active,
+            "onboarding_completed": current_user.onboarding_completed,
+            "current_stage": current_user.current_stage.value,
+            "created_at": current_user.created_at
+        },
+        "profile": {
+            "id": profile.id,
+            "user_id": profile.user_id,
+            "education_level": profile.education_level,
+            "degree": profile.degree,
+            "major": profile.major,
+            "graduation_year": profile.graduation_year,
+            "gpa": profile.gpa,
+            "age": profile.age,
+            "intended_degree": profile.intended_degree,
+            "field_of_study": profile.field_of_study,
+            "target_intake_year": profile.target_intake_year,
+            "preferred_countries": profile.preferred_countries,
+            "budget_min": profile.budget_min,
+            "budget_max": profile.budget_max,
+            "funding_plan": profile.funding_plan,
+            "ielts_score": profile.ielts_score,
+            "toefl_score": profile.toefl_score,
+            "gre_score": profile.gre_score,
+            "gmat_score": profile.gmat_score,
+            "sop_status": profile.sop_status,
+            "academic_strength": profile.academic_strength.value if profile.academic_strength else "average",
+            "exam_strength": profile.exam_strength.value if profile.exam_strength else "weak",
+            "sop_strength": profile.sop_strength.value if profile.sop_strength else "weak"
+        } if profile else None,
+        "current_stage": current_user.current_stage.value if current_user.current_stage else "building_profile",
         "onboarding_completed": current_user.onboarding_completed,
         "tasks": tasks,
         "shortlisted_count": len(shortlisted),
         "locked_count": len(locked),
         "profile_strength": {
-            "academic": profile.academic_strength if profile else None,
-            "exam": profile.exam_strength if profile else None,
-            "sop": profile.sop_strength if profile else None
+            "academic": profile.academic_strength.value if profile and profile.academic_strength else None,
+            "exam": profile.exam_strength.value if profile and profile.exam_strength else None,
+            "sop": profile.sop_strength.value if profile and profile.sop_strength else None
         }
     }
 

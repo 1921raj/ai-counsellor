@@ -105,17 +105,20 @@ export default function DashboardPage() {
     const stageInfo = STAGE_INFO[currentStage as keyof typeof STAGE_INFO];
 
     return (
-        <div className="min-h-screen pb-20">
+        <div className="min-h-screen pb-20 relative overflow-x-hidden">
+            {/* Background Effects */}
+            <div className="fixed inset-0 -z-10 mesh-gradient opacity-30" />
+
             <Toaster position="top-right" />
 
             {/* Navigation / Header */}
             <nav className="sticky top-0 z-50 border-b border-white/[0.05] bg-bg-dark/80 backdrop-blur-xl">
                 <div className="container-custom h-20 flex items-center justify-between">
                     <div className="flex items-center space-x-3 group cursor-pointer" onClick={() => router.push('/')}>
-                        <div className="w-10 h-10 bg-indigo-600 rounded-2xl flex items-center justify-center">
+                        <div className="w-10 h-10 bg-gradient-to-tr from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-600/20 group-hover:rotate-6 transition-transform">
                             <GraduationCap className="w-6 h-6 text-white" />
                         </div>
-                        <span className="text-xl font-bold tracking-tight">AI Counsellor</span>
+                        <span className="text-xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60">AI COUNSELLOR</span>
                     </div>
 
                     <div className="flex items-center space-x-6">
@@ -136,27 +139,28 @@ export default function DashboardPage() {
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="glass-card mb-12 bg-indigo-600/[0.03]"
+                    className="border-glow rounded-3xl overflow-hidden mb-12"
                 >
-                    <div className="p-8 md:p-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
+                    <div className="p-8 md:p-10 flex flex-col md:flex-row md:items-center justify-between gap-8 bg-indigo-600/[0.03] backdrop-blur-md">
                         <div>
                             <div className="flex items-center space-x-2 mb-2">
-                                <div className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse" />
-                                <span className="text-xs font-bold text-indigo-400 uppercase tracking-[0.2em]">Current Milestone</span>
+                                <div className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse-glow" />
+                                <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.3em]">Current Protocol Stage</span>
                             </div>
-                            <h2 className="text-3xl font-black mb-2">{stageInfo.title}</h2>
-                            <p className="text-text-sub font-medium">{stageInfo.description}</p>
+                            <h2 className="text-4xl font-black mb-2 tracking-tighter uppercase">{stageInfo.title}</h2>
+                            <p className="text-text-sub font-medium text-lg">{stageInfo.description}</p>
                         </div>
-                        <div className="min-w-[200px]">
-                            <div className="flex items-end justify-between mb-3 leading-none">
-                                <span className="text-xs font-bold text-text-dim uppercase">Overall Progress</span>
-                                <span className="text-2xl font-black">{stageInfo.progress}%</span>
+                        <div className="min-w-[240px]">
+                            <div className="flex items-end justify-between mb-4 leading-none">
+                                <span className="text-[10px] font-black text-text-dim uppercase tracking-widest">Global Progress</span>
+                                <span className="text-3xl font-black gradient-text">{stageInfo.progress}%</span>
                             </div>
-                            <div className="h-2.5 w-full bg-white/[0.05] rounded-full overflow-hidden">
+                            <div className="h-3 w-full bg-white/[0.05] rounded-full overflow-hidden border border-white/5">
                                 <motion.div
                                     initial={{ width: 0 }}
                                     animate={{ width: `${stageInfo.progress}%` }}
-                                    className="h-full bg-indigo-600"
+                                    transition={{ duration: 1, ease: "easeOut" }}
+                                    className="h-full bg-gradient-to-r from-indigo-600 to-purple-600"
                                 />
                             </div>
                         </div>
@@ -176,20 +180,24 @@ export default function DashboardPage() {
                                     { icon: <Target />, label: "Shortlist", sub: "Lock In", path: "/shortlist", color: "text-pink-400" },
                                     { icon: <BookOpen />, label: "Strategy", sub: "Guidance", path: "/guidance", color: "text-emerald-400", disabled: dashboardData.locked_count === 0 }
                                 ].map((action, i) => (
-                                    <button
+                                    <motion.button
                                         key={i}
+                                        whileHover={{ y: -5, scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
                                         onClick={() => !action.disabled && router.push(action.path)}
-                                        className={`glass-card p-6 text-left hover:bg-white/[0.03] transition-all group ${action.disabled ? 'opacity-40 grayscale cursor-not-allowed' : 'cursor-pointer'}`}
+                                        className={`p-1 border-glow rounded-3xl text-left transition-all group ${action.disabled ? 'opacity-40 grayscale cursor-not-allowed' : 'cursor-pointer'}`}
                                     >
-                                        <div className={`mb-6 p-3 w-fit rounded-xl bg-white/[0.03] ${action.color}`}>
-                                            {action.icon}
+                                        <div className="bg-[#121214] p-6 rounded-[calc(1.5rem-1px)] h-full">
+                                            <div className={`mb-6 p-4 w-fit rounded-2xl bg-white/[0.03] group-hover:scale-110 transition-transform ${action.color}`}>
+                                                {action.icon}
+                                            </div>
+                                            <h4 className="font-black text-sm mb-1 uppercase tracking-tight">{action.label}</h4>
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-[9px] uppercase font-black text-text-dim tracking-widest">{action.sub}</span>
+                                                <ChevronRight className="w-3 h-3 text-text-dim group-hover:translate-x-1 transition-transform" />
+                                            </div>
                                         </div>
-                                        <h4 className="font-bold text-sm mb-1">{action.label}</h4>
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-[10px] uppercase font-bold text-text-dim">{action.sub}</span>
-                                            <ChevronRight className="w-3 h-3 text-text-dim group-hover:translate-x-1 transition-transform" />
-                                        </div>
-                                    </button>
+                                    </motion.button>
                                 ))}
                             </div>
                         </section>
@@ -236,23 +244,23 @@ export default function DashboardPage() {
                     <div className="lg:col-span-4 space-y-12">
                         {/* Profile Card */}
                         <section>
-                            <h3 className="text-sm font-bold text-text-dim uppercase tracking-widest mb-6">Profile Snapshot</h3>
-                            <Card className="glass-card border-none bg-white/[0.02]">
-                                <div className="p-8 space-y-8">
+                            <h3 className="text-[10px] font-black text-white/30 uppercase tracking-[0.5em] mb-6">Profile Protocol</h3>
+                            <div className="p-1 border-glow rounded-[2.5rem] bg-white/[0.02]">
+                                <div className="p-8 space-y-8 bg-[#0c0c0e] rounded-[calc(2.5rem-1px)]">
                                     <div className="flex items-center space-x-4">
-                                        <div className="w-14 h-14 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 p-[2px]">
-                                            <div className="w-full h-full rounded-full bg-bg-card flex items-center justify-center">
-                                                <User className="w-6 h-6 text-white" />
+                                        <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 p-[2px] shadow-lg shadow-indigo-500/20">
+                                            <div className="w-full h-full rounded-[calc(1.5rem-2px)] bg-bg-dark flex items-center justify-center">
+                                                <User className="w-8 h-8 text-white" />
                                             </div>
                                         </div>
                                         <div>
-                                            <h4 className="font-bold text-lg">{dashboardData.user.full_name}</h4>
-                                            <div className="flex items-center space-x-2">
-                                                <span className="text-xs font-bold text-text-dim uppercase tracking-wider">{dashboardData.profile?.intended_degree} Applicant</span>
+                                            <h4 className="font-black text-2xl tracking-tight text-white">{dashboardData.user.full_name}</h4>
+                                            <div className="flex flex-wrap items-center gap-2 mt-1">
+                                                <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">{dashboardData.profile?.intended_degree}</span>
                                                 <span className="w-1 h-1 bg-white/20 rounded-full" />
-                                                <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider">{dashboardData.profile?.age} Years Old</span>
+                                                <span className="text-[10px] font-black text-text-dim uppercase tracking-widest">{dashboardData.profile?.age} Years</span>
                                                 <span className="w-1 h-1 bg-white/20 rounded-full" />
-                                                <span className="text-[10px] font-bold text-success/60 uppercase tracking-wider">GPA Standardized (4.0)</span>
+                                                <span className="text-[9px] font-black text-success/60 uppercase tracking-widest">GPA Opt.</span>
                                             </div>
                                         </div>
                                     </div>
@@ -296,22 +304,24 @@ export default function DashboardPage() {
                                         <ArrowUpRight className="ml-2 w-4 h-4" />
                                     </Button>
                                 </div>
-                            </Card>
+                            </div>
                         </section>
 
                         {/* Recommendation Prompt */}
-                        <Card className="glass-card border-indigo-500/20 bg-indigo-600/[0.02] p-8">
-                            <h4 className="font-bold mb-3 flex items-center">
-                                <Sparkles className="w-4 h-4 mr-2 text-indigo-400" />
-                                AI Insight
-                            </h4>
-                            <p className="text-sm text-text-sub font-medium leading-relaxed mb-6">
-                                Based on your STRONG academic profile, you have a high probability for Top 50 institutions in the UK and Canada.
-                            </p>
-                            <Button size="sm" onClick={() => router.push('/universities')} className="w-full rounded-xl">
-                                Explore Targets
-                            </Button>
-                        </Card>
+                        <div className="p-1 border-glow rounded-3xl bg-indigo-600/[0.05]">
+                            <div className="bg-[#0e0e11] p-8 rounded-[calc(1.5rem-1px)]">
+                                <h4 className="font-black mb-4 flex items-center text-white uppercase tracking-tighter">
+                                    <Sparkles className="w-5 h-5 mr-3 text-indigo-400 animate-pulse-glow" />
+                                    AI Insight Protocol
+                                </h4>
+                                <p className="text-sm text-text-sub font-medium leading-relaxed mb-8 border-l-2 border-indigo-600/30 pl-4">
+                                    Based on your <span className="text-indigo-400 font-bold uppercase tracking-widest text-[10px]">STRONG academic profile</span>, you have a high probability for Tier-1 institutions in the UK and Canada.
+                                </p>
+                                <Button size="lg" onClick={() => router.push('/universities')} className="w-full rounded-2xl h-14 font-black uppercase tracking-widest text-xs shadow-lg shadow-indigo-600/20">
+                                    Explore Targets
+                                </Button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </main>

@@ -31,9 +31,21 @@ from ai_counsellor import ai_counsellor
 from external_unis import external_search
 
 # Create database tables
-Base.metadata.create_all(bind=engine)
-
+# app = FastAPI
 app = FastAPI(title="AI Counsellor API", version="1.0.0")
+
+@app.get("/")
+def read_root():
+    return {
+        "status": "online",
+        "message": "AI Counsellor API is active",
+        "version": "1.0.0",
+        "research_engine": "active"
+    }
+
+@app.get("/health")
+def health_check():
+    return {"status": "healthy", "timestamp": datetime.now().isoformat()}
 
 @app.on_event("startup")
 def startup_event():
@@ -65,7 +77,6 @@ def seed_production_data(db: Session = Depends(get_db)):
         return {"status": "error", "message": str(e)}
 
 # CORS
-frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3500")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],

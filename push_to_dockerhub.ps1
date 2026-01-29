@@ -5,7 +5,7 @@ $DockerUsername = "git4dock"
 $BackendImageName = "ai-counsellor-backend"
 $FrontendImageName = "ai-counsellor-frontend"
 $Tag = "latest"
-$Version = "v1.3.1"
+$Version = "v1.3.2"
 $GoogleClientId = "603527817862-hr6a8po12p97cv62f0q71ob5kmh93qiu.apps.googleusercontent.com"
 $RailwayBackendUrl = "https://ai-counsellor-backend-production.up.railway.app"
 

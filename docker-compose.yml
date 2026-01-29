@@ -14,7 +14,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
   backend:
-    build: ./backend
+    image: git4dock/ai-counsellor-backend:latest
     container_name: ai_counsellor_backend
     ports:
       - "8000:8000"
@@ -27,11 +27,7 @@ services:
       - db
 
   frontend:
-    build:
-      context: ./frontend
-      args:
-        - NEXT_PUBLIC_API_URL=http://localhost:8000
-        - NEXT_PUBLIC_GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+    image: git4dock/ai-counsellor-frontend:latest
     container_name: ai_counsellor_frontend
     ports:
       - "3000:3000"

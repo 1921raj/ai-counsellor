@@ -121,6 +121,32 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Statistics */}
+      <section className="py-20">
+        <div className="container-custom">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {[
+              { value: "10,000+", label: "Global Universities" },
+              { value: "95%", label: "Success Rate" },
+              { value: "50+", label: "Countries Covered" },
+              { value: "24/7", label: "AI Support" }
+            ].map((stat, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="text-center p-8 glass-card border-none bg-white/[0.02]"
+              >
+                <div className="text-4xl md:text-5xl font-black gradient-text mb-2">{stat.value}</div>
+                <div className="text-sm font-bold text-text-dim uppercase tracking-widest">{stat.label}</div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Features Grid */}
       <section className="py-32">
         <div className="container-custom">

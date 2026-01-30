@@ -206,6 +206,9 @@ def google_login(login_data: GoogleLogin, db: Session = Depends(get_db)):
     
     # Try 1: Verify as ID Token (JWT) - Primary for OneTap/Standard
     client_id = os.getenv("GOOGLE_CLIENT_ID")
+    if client_id and client_id.startswith("GOCSPX-"):
+        print("❌ CRITICAL CONFIG ERROR: You have set GOOGLE_CLIENT_ID to a Client Secret (GOCSPX-). Please use the ID ending in .apps.googleusercontent.com")
+    
     try:
         if not client_id:
             print("⚠️ WARNING on Backend: GOOGLE_CLIENT_ID is not set in environment.")

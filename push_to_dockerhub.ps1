@@ -1,6 +1,6 @@
 $BackendImageName = "git4dock/ai-counsellor-backend"
 $FrontendImageName = "git4dock/ai-counsellor-frontend"
-$Version = "v1.5.8"
+$Version = "v1.6.0"
 $GoogleClientID = "603527817862-hr6a8po12p97cv62f0q71ob5kmh93qiu.apps.googleusercontent.com"
 
 Write-Host "Starting Build & Push Protocol [$Version]"

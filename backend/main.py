@@ -204,51 +204,64 @@ def google_login(login_data: GoogleLogin, db: Session = Depends(get_db)):
     email = None
     name = ""
     
-    # Try 1: Verify as ID Token (JWT)
+    # Try 1: Verify as ID Token (JWT) - Primary for OneTap/Standard
+    client_id = os.getenv("GOOGLE_CLIENT_ID")
     try:
-        client_id = os.getenv("GOOGLE_CLIENT_ID")
         if not client_id:
-            print("⚠️ WARNING: GOOGLE_CLIENT_ID is not set in environment variables.")
+            print("⚠️ WARNING on Backend: GOOGLE_CLIENT_ID is not set in environment.")
         
+        # Some skew is allowed for server time differences
         id_info = id_token.verify_oauth2_token(
             login_data.token,
             google_requests.Request(),
             audience=client_id
         )
-        
         email = id_info['email']
         name = id_info.get('name', '')
-        print(f"✅ Google ID Token verified for: {email}")
+        print(f"✅ Google ID Token verified: {email}")
         
-    except Exception as e:
-        print(f"ℹ️ ID Token verification failed (expected if using Access Token): {str(e)}")
-        # Try 2: Verify as Access Token (fetch userinfo)
+    except Exception as jwt_err:
+        jwt_error_msg = str(jwt_err)
+        print(f"ℹ️ ID Token verification bypass: {jwt_error_msg}")
+        
+        # Try 2: Verify as Access Token (OAuth2 UserInfo) - Used by useGoogleLogin implicit flow
         try:
+            print("🔄 Attempting Access Token verification via Google API...")
             response = requests.get(
                 "https://www.googleapis.com/oauth2/v3/userinfo",
-                headers={"Authorization": f"Bearer {login_data.token}"}
+                headers={"Authorization": f"Bearer {login_data.token}"},
+                timeout=5
             )
             
             if response.status_code == 200:
                 user_info = response.json()
                 email = user_info.get('email')
                 name = user_info.get('name', '')
+                print(f"✅ Google Access Token verified: {email}")
             else:
-                raise ValueError("Invalid access token")
-                
-        except Exception as e:
-            print(f"❌ Access token verification failed: {str(e)}")
-            if hasattr(e, 'response') and e.response:
-                print(f"Response status: {e.response.status_code}")
-                print(f"Response content: {e.response.text}")
-            
-            error_detail = "Google Token Verification Failed"
-            if "invalid_token" in str(e).lower() or "401" in str(e):
-                error_detail = "Google session expired or token is invalid. Please sign in again."
-            
+                print(f"❌ Google API UserInfo failed: {response.status_code} - {response.text}")
+                # Try 3: Fallback to tokenInfo (older but reliable)
+                token_info_resp = requests.get(
+                    f"https://oauth2.googleapis.com/tokeninfo?access_token={login_data.token}",
+                    timeout=5
+                )
+                if token_info_resp.status_code == 200:
+                    user_info = token_info_resp.json()
+                    email = user_info.get('email')
+                    name = user_info.get('name', 'Google User')
+                    print(f"✅ Google TokenInfo verified fallback: {email}")
+                else:
+                    raise HTTPException(
+                        status_code=status.HTTP_401_UNAUTHORIZED,
+                        detail=f"Google verification failed. Backend Error: {response.text or token_info_resp.text}"
+                    )
+        except HTTPException:
+            raise
+        except Exception as ae:
+            print(f"❌ Final Google Auth Fallback failed: {str(ae)}")
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail=error_detail
+                detail=f"Neural Auth Protocol Error: {str(ae)}"
             )
 
     if not email:

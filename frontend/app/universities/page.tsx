@@ -54,15 +54,36 @@ export default function UniversitiesPage() {
             } else {
                 const params: any = {};
                 if (filters.name) params.name = filters.name;
-                if (filters.country) params.country = filters.country;
+
+                // Handle common country aliases
+                if (filters.country) {
+                    const countryMap: Record<string, string> = {
+                        'usa': 'United States',
+                        'us': 'United States',
+                        'uk': 'United Kingdom',
+                        'uae': 'United Arab Emirates'
+                    };
+                    const normalized = filters.country.toLowerCase().trim();
+                    params.country = countryMap[normalized] || filters.country;
+                }
+
                 if (filters.major) params.major = filters.major;
 
-                // Use raw USD from filters
-                if (filters.min_tuition) params.min_tuition = parseFloat(filters.min_tuition);
-                if (filters.max_tuition) params.max_tuition = parseFloat(filters.max_tuition);
+                // Safely parse numbers
+                if (filters.min_tuition && !isNaN(parseFloat(filters.min_tuition))) {
+                    params.min_tuition = parseFloat(filters.min_tuition);
+                }
+                if (filters.max_tuition && !isNaN(parseFloat(filters.max_tuition))) {
+                    params.max_tuition = parseFloat(filters.max_tuition);
+                }
 
-                if (filters.min_ranking) params.min_ranking = parseInt(filters.min_ranking);
-                if (filters.max_ranking) params.max_ranking = parseInt(filters.max_ranking);
+                if (filters.min_ranking && !isNaN(parseInt(filters.min_ranking))) {
+                    params.min_ranking = parseInt(filters.min_ranking);
+                }
+                if (filters.max_ranking && !isNaN(parseInt(filters.max_ranking))) {
+                    params.max_ranking = parseInt(filters.max_ranking);
+                }
+
                 if (filters.scholarship) params.scholarship = true;
 
                 console.log('🔍 Executing Discovery Protocol with params:', params);
@@ -256,13 +277,15 @@ export default function UniversitiesPage() {
                                         <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.4em] ml-2">Budget Range ($)</label>
                                         <div className="flex gap-2">
                                             <input
-                                                className="w-1/2 h-14 bg-bg-dark/50 border border-white/5 rounded-2xl px-4 text-xs font-bold focus:outline-none focus:border-indigo-600"
+                                                type="number"
+                                                className="w-1/2 h-14 bg-bg-dark/50 border border-white/5 rounded-2xl px-4 text-xs font-bold focus:outline-none focus:border-indigo-600 appearance-none"
                                                 placeholder="Min"
                                                 value={filters.min_tuition}
                                                 onChange={(e) => setFilters({ ...filters, min_tuition: e.target.value })}
                                             />
                                             <input
-                                                className="w-1/2 h-14 bg-bg-dark/50 border border-white/5 rounded-2xl px-4 text-xs font-bold focus:outline-none focus:border-indigo-600"
+                                                type="number"
+                                                className="w-1/2 h-14 bg-bg-dark/50 border border-white/5 rounded-2xl px-4 text-xs font-bold focus:outline-none focus:border-indigo-600 appearance-none"
                                                 placeholder="Max"
                                                 value={filters.max_tuition}
                                                 onChange={(e) => setFilters({ ...filters, max_tuition: e.target.value })}
@@ -273,13 +296,15 @@ export default function UniversitiesPage() {
                                         <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.4em] ml-2">Global Ranking</label>
                                         <div className="flex gap-2">
                                             <input
-                                                className="w-1/2 h-14 bg-bg-dark/50 border border-white/5 rounded-2xl px-4 text-xs font-bold focus:outline-none focus:border-indigo-600"
+                                                type="number"
+                                                className="w-1/2 h-14 bg-bg-dark/50 border border-white/5 rounded-2xl px-4 text-xs font-bold focus:outline-none focus:border-indigo-600 appearance-none"
                                                 placeholder="From"
                                                 value={filters.min_ranking}
                                                 onChange={(e) => setFilters({ ...filters, min_ranking: e.target.value })}
                                             />
                                             <input
-                                                className="w-1/2 h-14 bg-bg-dark/50 border border-white/5 rounded-2xl px-4 text-xs font-bold focus:outline-none focus:border-indigo-600"
+                                                type="number"
+                                                className="w-1/2 h-14 bg-bg-dark/50 border border-white/5 rounded-2xl px-4 text-xs font-bold focus:outline-none focus:border-indigo-600 appearance-none"
                                                 placeholder="To"
                                                 value={filters.max_ranking}
                                                 onChange={(e) => setFilters({ ...filters, max_ranking: e.target.value })}

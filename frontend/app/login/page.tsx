@@ -18,6 +18,7 @@ export default function LoginPage() {
         password: '',
     });
     const [isLoading, setIsLoading] = useState(false);
+    const [authError, setAuthError] = useState<string | null>(null);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -40,7 +41,14 @@ export default function LoginPage() {
                 router.push('/onboarding');
             }
         } catch (error: any) {
-            toast.error(error.response?.data?.detail || 'Login failed. Please try again.');
+            console.error('Login Error details:', {
+                status: error.response?.status,
+                data: error.response?.data,
+                url: error.config?.url,
+                baseUrl: error.config?.baseURL
+            });
+            setAuthError(error.response?.data?.detail || 'Login failed. System may be syncing, please retry.');
+            toast.error('Authentication failed');
         } finally {
             setIsLoading(false);
         }
@@ -66,7 +74,10 @@ export default function LoginPage() {
                     router.push('/onboarding');
                 }
             } catch (error: any) {
-                toast.error(error.response?.data?.detail || 'Google Login failed');
+                const errorMsg = error.response?.data?.detail || 'Google Authentication failed. Your token might be expired or the server configuration is incorrect.';
+                setAuthError(errorMsg);
+                toast.error('Google Login Error');
+                console.error('Google Auth Error:', error);
             } finally {
                 setIsLoading(false);
             }
@@ -96,6 +107,24 @@ export default function LoginPage() {
                 </div>
 
                 <Card>
+                    {authError && (
+                        <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 flex items-start space-x-3 text-red-400 animate-in fade-in slide-in-from-top-2 duration-300">
+                            <div className="mt-0.5">
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div className="flex-1">
+                                <p className="text-xs font-bold uppercase tracking-widest mb-1">Security Protocol Error</p>
+                                <p className="text-[11px] leading-relaxed font-medium opacity-90">{authError}</p>
+                            </div>
+                            <button onClick={() => setAuthError(null)} className="opacity-50 hover:opacity-100 p-1">
+                                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                    )}
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <Input
                             label="Email"

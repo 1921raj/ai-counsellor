@@ -1,8 +1,16 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const getBaseUrl = () => {
+    if (typeof window !== 'undefined') {
+        // If we are on the production domain, default to the production backend
+        if (window.location.hostname.includes('railway.app')) {
+            return 'https://ai-counsellor-backend-production.up.railway.app';
+        }
+    }
+    return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+};
 
-console.log('🔗 Connecting to Backend at:', API_BASE_URL); // Debug log
+const API_BASE_URL = getBaseUrl();
 
 export const api = axios.create({
     baseURL: API_BASE_URL,
@@ -49,6 +57,7 @@ export const profileAPI = {
     create: (data: any) => api.post('/profile', data),
     get: () => api.get('/profile'),
     update: (data: any) => api.put('/profile', data),
+    skipOnboarding: () => api.post('/skip-onboarding'),
 };
 
 // University API

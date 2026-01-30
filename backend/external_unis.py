@@ -32,18 +32,15 @@ class ExternalUniversitySearch:
                 country_clean = i['country'].lower().strip()
                 
                 self.country_index[country_clean].append(i)
+                # Primary name index
                 self.name_index[name_clean] = i
                 
-                # Index by words for better search
-                words = name_clean.split(" ")
-                if len(words) > 1:
-                    for word in words[1:]:
-                        if len(word) > 2: # Only index words longer than 2 chars
-                            self.name_index[f"{word}_{uuid.uuid4().hex[:8]}"] = i
+                # Optional: Only index words if name is very long to avoid massive overhead
+                # We'll stick to primary names for memory stability on small servers
             
             self.prefix_tree = Trie(**self.name_index)
             self.loaded = True
-            print(f"Loaded {len(self.data)} universities globally.")
+            print(f"✅ Loaded {len(self.data)} universities globally.")
         except Exception as e:
             print(f"Error loading global uni data: {e}")
 

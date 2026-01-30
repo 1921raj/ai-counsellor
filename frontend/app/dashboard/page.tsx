@@ -329,20 +329,53 @@ export default function DashboardPage() {
                                     {/* Evaluation */}
                                     <div className="space-y-6">
                                         {[
-                                            { label: "Academic", level: dashboardData.profile_strength?.academic },
-                                            { label: "Standardized Tests", level: dashboardData.profile_strength?.exam },
-                                            { label: "Portfolio/SOP", level: dashboardData.profile_strength?.sop }
+                                            {
+                                                label: "Academic",
+                                                level: dashboardData.profile_strength?.academic,
+                                                details: [
+                                                    { label: "GPA", value: dashboardData.profile?.gpa },
+                                                    { label: "Degree", value: dashboardData.profile?.degree },
+                                                    { label: "Major", value: dashboardData.profile?.major }
+                                                ]
+                                            },
+                                            {
+                                                label: "Standardized Tests",
+                                                level: dashboardData.profile_strength?.exam,
+                                                details: [
+                                                    { label: "IELTS", value: dashboardData.profile?.ielts_score },
+                                                    { label: "TOEFL", value: dashboardData.profile?.toefl_score },
+                                                    { label: "GRE", value: dashboardData.profile?.gre_score },
+                                                    { label: "GMAT", value: dashboardData.profile?.gmat_score }
+                                                ]
+                                            },
+                                            {
+                                                label: "Portfolio/SOP",
+                                                level: dashboardData.profile_strength?.sop,
+                                                details: [
+                                                    { label: "SOP Status", value: dashboardData.profile?.sop_status }
+                                                ]
+                                            }
                                         ].map((stat, i) => (
-                                            <div key={i}>
+                                            <div key={i} className="group/stat">
                                                 <div className="flex justify-between items-center mb-2">
-                                                    <span className="text-xs font-bold text-text-sub">{stat.label}</span>
+                                                    <span className="text-xs font-bold text-text-sub group-hover/stat:text-indigo-400 transition-colors">{stat.label}</span>
                                                     <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded ${stat.level === 'strong' ? 'text-success bg-success/10' :
                                                         stat.level === 'average' ? 'text-warning bg-warning/10' : 'text-error bg-error/10'
                                                         }`}>{stat.level}</span>
                                                 </div>
-                                                <div className="h-1.5 w-full bg-white/5 rounded-full">
-                                                    <div className={`h-full rounded-full ${stat.level === 'strong' ? 'bg-success' : stat.level === 'average' ? 'bg-warning' : 'bg-error'
+                                                <div className="h-1.5 w-full bg-white/5 rounded-full mb-3">
+                                                    <div className={`h-full rounded-full transition-all duration-1000 ${stat.level === 'strong' ? 'bg-success shadow-[0_0_10px_rgba(16,185,129,0.5)]' : stat.level === 'average' ? 'bg-warning' : 'bg-error'
                                                         }`} style={{ width: stat.level === 'strong' ? '100%' : stat.level === 'average' ? '60%' : '30%' }} />
+                                                </div>
+
+                                                {/* Details list */}
+                                                <div className="grid grid-cols-2 gap-2 mt-2">
+                                                    {stat.details.filter(d => d.value).map((detail, idx) => (
+                                                        <div key={idx} className="flex flex-col p-2 bg-white/[0.02] border border-white/5 rounded-lg">
+                                                            <span className="text-[8px] font-black text-text-dim uppercase tracking-widest leading-none mb-1">{detail.label}</span>
+                                                            <span className="text-[10px] font-bold text-white truncate">{detail.value}</span>
+                                                        </div>
+                                                    ))}
                                                 </div>
                                             </div>
                                         ))}

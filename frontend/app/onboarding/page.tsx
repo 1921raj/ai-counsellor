@@ -7,7 +7,7 @@ import Input from '@/components/ui/Input';
 import Card from '@/components/ui/Card';
 import { profileAPI } from '@/lib/api';
 import toast, { Toaster } from 'react-hot-toast';
-import { CheckCircle, ArrowRight, ArrowLeft, Info, LogOut } from 'lucide-react';
+import { CheckCircle, ArrowRight, ArrowLeft, Info, LogOut, Sparkles } from 'lucide-react';
 
 const STEPS = [
     { id: 1, title: 'Personal Details', description: 'Your basic information' },
@@ -432,7 +432,44 @@ export default function OnboardingPage() {
                         <span>Logout</span>
                     </button>
                     <h1 className="text-4xl font-bold mb-4">Complete Your Profile</h1>
-                    <p className="text-gray-400">Help us understand your background and goals</p>
+                    <p className="text-gray-400 mb-8">Help us understand your background and goals</p>
+
+                    <div className="flex flex-col md:flex-row items-center justify-center gap-4 mb-12">
+                        <div className="p-1 rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 shadow-xl shadow-indigo-600/20">
+                            <Button
+                                onClick={async () => {
+                                    try {
+                                        setIsLoading(true);
+                                        await profileAPI.skipOnboarding();
+                                        toast.success('AI Interview mode activated!');
+                                        router.push('/chat');
+                                    } catch (err) {
+                                        toast.error('Failed to initialize AI mode');
+                                    } finally {
+                                        setIsLoading(false);
+                                    }
+                                }}
+                                className="bg-[#0c0c0e] hover:bg-transparent border-none px-8 py-4 h-auto rounded-[calc(1rem-1px)] transition-all group"
+                                isLoading={isLoading}
+                            >
+                                <div className="flex items-center space-x-3 text-left">
+                                    <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg shadow-indigo-600/40">
+                                        <Sparkles className="w-5 h-5 text-white" />
+                                    </div>
+                                    <div>
+                                        <p className="font-black text-sm uppercase tracking-widest text-white">Build Profile with AI</p>
+                                        <p className="text-[10px] text-indigo-300 font-medium">Chat naturaly, skip the forms</p>
+                                    </div>
+                                </div>
+                            </Button>
+                        </div>
+
+                        <div className="text-text-dim text-xs font-black uppercase tracking-widest px-4">OR</div>
+
+                        <div className="text-text-dim text-xs font-bold bg-white/5 px-6 py-4 rounded-2xl border border-white/10 uppercase tracking-tighter">
+                            Fill Form Manually
+                        </div>
+                    </div>
                 </div>
 
                 {/* Progress Steps */}

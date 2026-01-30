@@ -269,7 +269,15 @@ export default function GuidancePage() {
                                     <span className="font-bold text-purple-300 text-sm uppercase tracking-wider">AI Strategist</span>
                                 </div>
                                 <p className="text-sm text-gray-300 italic">
-                                    "Since this is a {lockedUni.category} school for you, I recommend focusing heavily on your SOP. Highlight your research in {details?.programs ? JSON.parse(details.programs)[0] : 'your field'} to differentiate yourself from other high-GPA applicants."
+                                    "Since this is a {lockedUni.category} school for you, I recommend focusing heavily on your SOP. Highlight your research in {(() => {
+                                        if (!details?.programs) return 'your field';
+                                        try {
+                                            const p = JSON.parse(details.programs);
+                                            return Array.isArray(p) ? p[0] : p;
+                                        } catch {
+                                            return details.programs.split(',')[0].trim();
+                                        }
+                                    })()} to differentiate yourself from other high-GPA applicants."
                                 </p>
                             </Card>
                         </section>

@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
+from sqlalchemy import text
 from typing import List
 from datetime import datetime
 import json
@@ -37,15 +38,48 @@ app = FastAPI(title="AI Counsellor API", version="1.0.0")
 @app.get("/")
 def read_root():
     return {
-        "status": "online",
-        "message": "AI Counsellor API is active",
+        "message": "AI Counsellor API",
         "version": "1.0.0",
-        "research_engine": "active"
+        "status": "running"
     }
 
 @app.get("/health")
-def health_check():
-    return {"status": "healthy", "timestamp": datetime.now().isoformat()}
+def health_check(db: Session = Depends(get_db)):
+    db_status = "unhealthy"
+    try:
+        db.execute(text("SELECT 1"))
+        db_status = "healthy"
+    except Exception as e:
+        db_status = f"error: {str(e)}"
+        
+    return {
+        "status": "active",
+        "timestamp": datetime.now().isoformat(),
+        "database": db_status,
+        "environment": "production" if os.getenv("DATABASE_URL") else "development",
+        "engine_state": "ready" if external_search.loaded else "initializing"
+    }
+
+@app.get("/debug/protocol")
+def get_diagnostics():
+    """Deep protocol diagnostics for troubleshooting deployment"""
+    env_vars = {
+        "DATABASE_URL": "Set" if os.getenv("DATABASE_URL") else "Missing",
+        "GEMINI_API_KEY": "Set" if os.getenv("GEMINI_API_KEY") else "Missing",
+        "GOOGLE_CLIENT_ID": "Set" if os.getenv("GOOGLE_CLIENT_ID") else "Missing",
+        "PORT": os.getenv("PORT", "8000")
+    }
+    
+    return {
+        "neural_link": "established",
+        "status": "running",
+        "platform_diagnostics": env_vars,
+        "memory_state": "stable",
+        "initialization": {
+            "search_engine": "loaded" if external_search.loaded else "pending",
+            "db_seed": "check_logs"
+        }
+    }
 
 @app.on_event("startup")
 def startup_event():
@@ -56,18 +90,22 @@ def startup_event():
             Base.metadata.create_all(bind=engine)
             
             # Auto-seed if database is empty
-            from seed import seed_universities
-            # Use a fresh session for the background thread
-            from database import SessionLocal
-            db = SessionLocal()
             try:
-                if db.query(University).count() == 0:
-                    print("Production DB is empty. Initializing seed...")
-                    seed_universities()
-                else:
-                    print(f"Database already has {db.query(University).count()} universities.")
-            finally:
-                db.close()
+                from seed import seed_universities
+                from database import SessionLocal
+                db = SessionLocal()
+                try:
+                    if db.query(University).count() == 0:
+                        print("🚀 Production DB is empty. Initializing seed...")
+                        seed_universities()
+                    else:
+                        print(f"✅ Database already has {db.query(University).count()} universities.")
+                finally:
+                    db.close()
+            except ImportError:
+                print("⚠️  NOTICE: seed.py not found. Skipping auto-seeding. Make sure to provide university data elsewhere.")
+            except Exception as se:
+                print(f"❌ Error during auto-seeding: {se}")
             
             # Loader for global uni data
             print("🌍 Loading global research engine data...")
@@ -80,8 +118,6 @@ def startup_event():
     # Start initialization in background so health check passes immediately
     import threading
     threading.Thread(target=run_initialization, daemon=True).start()
-    
-    return {"status": "success", "message": "Backend startup sequence initiated"}
 
 @app.get("/maintenance/seed")
 def seed_production_data(db: Session = Depends(get_db)):
@@ -170,8 +206,9 @@ def google_login(login_data: GoogleLogin, db: Session = Depends(get_db)):
     
     # Try 1: Verify as ID Token (JWT)
     try:
-        # Get Client ID from env or let library handle if only verifying signature
         client_id = os.getenv("GOOGLE_CLIENT_ID")
+        if not client_id:
+            print("⚠️ WARNING: GOOGLE_CLIENT_ID is not set in environment variables.")
         
         id_info = id_token.verify_oauth2_token(
             login_data.token,
@@ -181,8 +218,10 @@ def google_login(login_data: GoogleLogin, db: Session = Depends(get_db)):
         
         email = id_info['email']
         name = id_info.get('name', '')
+        print(f"✅ Google ID Token verified for: {email}")
         
-    except ValueError:
+    except Exception as e:
+        print(f"ℹ️ ID Token verification failed (expected if using Access Token): {str(e)}")
         # Try 2: Verify as Access Token (fetch userinfo)
         try:
             response = requests.get(
@@ -198,16 +237,25 @@ def google_login(login_data: GoogleLogin, db: Session = Depends(get_db)):
                 raise ValueError("Invalid access token")
                 
         except Exception as e:
-            print(f"Access token verification failed: {e}")
+            print(f"❌ Access token verification failed: {str(e)}")
+            if hasattr(e, 'response') and e.response:
+                print(f"Response status: {e.response.status_code}")
+                print(f"Response content: {e.response.text}")
+            
+            error_detail = "Google Token Verification Failed"
+            if "invalid_token" in str(e).lower() or "401" in str(e):
+                error_detail = "Google session expired or token is invalid. Please sign in again."
+            
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid Google token"
+                detail=error_detail
             )
 
     if not email:
+        print("❌ Verification succeeded but no email was found in the token response.")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not retrieve email from Google token"
+            detail="Could not retrieve email from Google. Ensure your Google account has an email address."
         )
         
     try:
@@ -331,6 +379,36 @@ def create_profile(
     db.commit()
     
     return profile
+
+@app.post("/skip-onboarding")
+def skip_onboarding(
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    # Check if profile exists, if not create empty
+    profile = db.query(UserProfile).filter(UserProfile.user_id == current_user.id).first()
+    if not profile:
+        profile = UserProfile(
+            user_id=current_user.id,
+            education_level="Not provided",
+            degree="Not provided",
+            major="Not provided",
+            graduation_year=2025,
+            intended_degree="Not provided",
+            field_of_study="Not provided",
+            target_intake_year=2026,
+            preferred_countries="[]",
+            budget_min=0,
+            budget_max=0,
+            funding_plan="Not provided",
+            sop_status="Not started"
+        )
+        db.add(profile)
+    
+    current_user.onboarding_completed = True
+    current_user.current_stage = UserStage.BUILDING_PROFILE
+    db.commit()
+    return {"status": "success"}
 
 @app.get("/profile", response_model=ProfileResponse)
 def get_profile(
@@ -936,6 +1014,26 @@ async def execute_ai_action(action: dict, user: User, db: Session):
                     shortlist.locked_at = datetime.utcnow()
                     user.current_stage = UserStage.PREPARING_APPLICATIONS
                     db.commit()
+
+        elif action_name == "UPDATE_PROFILE":
+            profile = db.query(UserProfile).filter(UserProfile.user_id == user.id).first()
+            if profile:
+                for field, value in params.items():
+                    if hasattr(profile, field):
+                        setattr(profile, field, value)
+                
+                # Recalculate strengths if GPA change
+                if "gpa" in params:
+                    gpa = params["gpa"]
+                    if gpa >= 3.5:
+                        profile.academic_strength = ProfileStrength.STRONG
+                    elif gpa >= 3.0:
+                        profile.academic_strength = ProfileStrength.AVERAGE
+                    else:
+                        profile.academic_strength = ProfileStrength.WEAK
+                
+                db.commit()
+                return {"type": "PROFILE_UPDATE", "fields": list(params.keys())}
 
         elif action_name == "DELETE_TASK":
             task_id = params.get("task_id")

@@ -4,9 +4,10 @@ import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
-import { chatAPI } from '@/lib/api';
+import { universityAPI, shortlistAPI, profileAPI, chatAPI } from '@/lib/api';
 import toast, { Toaster } from 'react-hot-toast';
-import { ArrowLeft, Send, Bot, User, Sparkles, Mic, MicOff, Volume2, VolumeX, GraduationCap, Target, ExternalLink } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, Send, Bot, User, Sparkles, Mic, MicOff, Volume2, VolumeX, GraduationCap, Target, ExternalLink, UserCheck } from 'lucide-react';
 import 'regenerator-runtime/runtime';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 
@@ -263,6 +264,22 @@ export default function ChatPage() {
                                             {/* Action Results (e.g. University Search) */}
                                             {message.action_results && message.action_results.map((result: any, rid: number) => (
                                                 <div key={rid} className="mt-2 space-y-4">
+                                                    {result.type === 'PROFILE_UPDATE' && (
+                                                        <motion.div
+                                                            initial={{ opacity: 0, x: -10 }}
+                                                            animate={{ opacity: 1, x: 0 }}
+                                                            className="flex items-center space-x-3 p-3 rounded-xl bg-indigo-600/10 border border-indigo-500/20 max-w-fit"
+                                                        >
+                                                            <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
+                                                                <UserCheck className="w-4 h-4 text-white" />
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-[10px] font-black uppercase tracking-widest text-indigo-400 leading-none mb-1">Neural Profile Update</p>
+                                                                <p className="text-[9px] text-text-dim font-medium">Synchronized: <span className="text-white">{result.fields.join(', ')}</span></p>
+                                                            </div>
+                                                        </motion.div>
+                                                    )}
+
                                                     {result.type === 'UNIVERSITY_SEARCH' && (
                                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                             {result.results.map((uni: any) => (
